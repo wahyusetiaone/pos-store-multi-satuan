@@ -32,9 +32,10 @@ class Voucher extends Model
     {
         $now = now();
 
-        return $this->is_active &&
+        $result = $this->is_active &&
             $now->greaterThanOrEqualTo($this->valid_from) &&
             ($this->valid_until === null || $now->lessThanOrEqualTo($this->valid_until)) &&
             ($this->usage_limit === null || $this->times_used < $this->usage_limit);
+        return $result;
     }
 }

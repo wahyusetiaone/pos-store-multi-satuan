@@ -50,7 +50,10 @@ function openShippingModal(purchaseId) {
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input item-checkbox" name="items[${index}][selected]" value="1">
                             <input type="hidden" name="items[${index}][product_id]" value="${item.product_id}">
+                            <input type="hidden" name="items[${index}][product_unit_id]" value="${item.product_unit_id}">
                             <input type="hidden" name="items[${index}][buy_price]" value="${item.buy_price}">
+                            <input type="hidden" name="items[${index}][quantity]" value="${item.quantity}">
+                            <input type="hidden" name="items[${index}][price]" value="${item.price}">
                         </div>
                     </td>
                     <td>${item.product?.name || 'Unknown Product'}</td>
@@ -58,10 +61,6 @@ function openShippingModal(purchaseId) {
                     <td>
                         <input type="number" class="form-control shipping-qty" name="items[${index}][quantity]"
                                min="1" max="${item.quantity}" value="${item.quantity}">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control" name="items[${index}][price]"
-                               value="${item.price}" readonly>
                     </td>
                 </tr>
             `).join('');
@@ -160,8 +159,9 @@ function calculateTotal() {
     document.querySelectorAll('.item-checkbox').forEach((checkbox, index) => {
         if (checkbox.checked) {
             const qty = document.querySelectorAll('.shipping-qty')[index].value;
-            const price = document.querySelectorAll('input[name^="items["][name$="[price]"]')[index].value;
-            total += qty * price;
+            const qty_u = document.querySelectorAll('input[name^="items["][name$="[quantity]"]')[index].value;
+            const price = document.querySelectorAll('input[name^="items["][name$="[buy_price]"]')[index].value;
+            total += (price/qty_u) * qty;
         }
     });
     document.getElementById('total_amount').value = total.toFixed(2);

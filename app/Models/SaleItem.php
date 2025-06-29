@@ -8,8 +8,10 @@ class SaleItem extends Model
 {
     protected $fillable = [
         'sale_id',
+        'variant_id',
         'product_id',
         'quantity',
+        'quantity_conversion',
         'price',
         'discount',
         'subtotal',
@@ -22,7 +24,7 @@ class SaleItem extends Model
 
         static::creating(function ($saleItem) {
             $product = $saleItem->product;
-            $profit = ($saleItem->price - $product->buy_price) * $saleItem->quantity - $saleItem->discount;
+            $profit = (($saleItem->price / $saleItem->quantity_conversion) - $product->buy_price) * $saleItem->quantity - $saleItem->discount;
             $saleItem->unit_profit_loss = $profit;
         });
     }
@@ -35,5 +37,10 @@ class SaleItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function variant()
+    {
+        return $this->belongsTo(\App\Models\ProductVariant::class, 'variant_id');
     }
 }

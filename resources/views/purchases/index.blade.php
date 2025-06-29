@@ -166,15 +166,14 @@
                                     <th>Produk</th>
                                     <th style="width: 120px">Qty Pembelian</th>
                                     <th style="width: 120px">Qty Kirim</th>
-                                    <th style="width: 150px">Harga</th>
                                 </tr>
                             </thead>
                             <tbody id="purchaseItems">
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-end fw-bold">Total:</td>
-                                    <td>
+                                    <td colspan="2" class="text-end fw-bold">Total:</td>
+                                    <td colspan="2">
                                         <input type="number" name="total" id="total_amount" class="form-control" readonly>
                                     </td>
                                 </tr>

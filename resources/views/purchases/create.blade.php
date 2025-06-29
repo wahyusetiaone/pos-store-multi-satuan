@@ -105,39 +105,10 @@
                         </div>
 
                         <!-- Product Selection -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Tambah Produk</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <select id="product_select" class="form-select">
-                                            <option value="">Pilih Produk...</option>
-                                            @foreach($products as $product)
-                                                <option value="{{ $product->id }}"
-                                                        data-name="{{ $product->name }}"
-                                                        data-price="{{ $product->price }}">
-                                                    {{ $product->name }} (Stok: {{ $product->stock }})
-                                                </option>
-                                            @endforeach
-                                            <option value="new" style="background-color: #e9ecef; font-weight: bold;">+ Tambah Produk Baru</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="qty_input" class="form-control" placeholder="Jumlah" min="1">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="buy_price_input" class="form-control" placeholder="Harga Beli" min="0">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="button" class="btn btn-primary w-100" id="add_item">Tambah</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                <i class="fas fa-plus"></i> Tambah Produk
+                            </button>
                         </div>
 
                         <!-- Items Table -->
@@ -146,10 +117,11 @@
                                 <thead>
                                 <tr>
                                     <th>Produk</th>
-                                    <th width="100">Jumlah</th>
-                                    <th width="150">Harga Jual</th>
-                                    <th width="150">Harga Beli</th>
-                                    <th width="150">Subtotal</th>
+                                    <th>Satuan</th>
+                                    <th width="80">Jumlah</th>
+                                    <th width="80">PPN (%)</th>
+                                    <th width="120">Harga Beli</th>
+                                    <th width="120">Harga Jual</th>
                                     <th width="50">Aksi</th>
                                 </tr>
                                 </thead>
@@ -158,13 +130,15 @@
                                 </tbody>
                                 <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                                    <td colspan="5" class="text-end fw-bold">Total:</td>
                                     <td colspan="2">
                                         <input type="number" name="total" id="total_amount" class="form-control" readonly>
                                     </td>
                                 </tr>
                                 </tfoot>
                             </table>
+                            <small class="form-text text-muted">* Harga jual adalah harga jual per satuan dasar, dan tidak mempengaruhi harga penjualan serta dapat diubah pada halaman management produk.</small>
+
                         </div>
 
                         <div class="mb-3">
@@ -177,6 +151,63 @@
                             <button type="submit" class="btn btn-primary">Simpan Pembelian</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Tambah Produk -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Tambah Produk ke Daftar Pembelian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Produk</label>
+                        <select id="product_select" class="form-select">
+                            <option value="">Pilih Produk...</option>
+                            @foreach($products as $product)
+                                <option value="{{ $product->id }}"
+                                        data-name="{{ $product->name }}"
+                                        data-price="{{ $product->price }}">
+                                    {{ $product->name }} (Stok: {{ $product->stock }} {{ $product->defaultUnit->name }})
+                                </option>
+                            @endforeach
+                            <option value="new" style="background-color: #e9ecef; font-weight: bold;">+ Tambah Produk Baru</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Satuan Pembelian</label>
+                        <select id="product_unit_id" name="product_unit_id" class="form-select" disabled>
+                            <option value="">Pilih Satuan...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Pembelian</label>
+                        <input type="number" id="qty_input" class="form-control" placeholder="Jumlah" min="1" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PPN (%)</label>
+                        <input type="number" id="ppn_input" class="form-control" placeholder="PPN %" min="0" max="100" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Harga Beli</label>
+                        <small class="form-text text-muted"> sudah termasuk PPN</small>
+                        <input type="number" id="buy_price_input" class="form-control" placeholder="Harga Beli" min="0" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Harga Jual</label>
+                        <small class="form-text text-muted"> dalam satuan dasar</small>
+                        <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0" disabled readonly>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-primary w-100" id="add_item" disabled data-bs-dismiss="modal">Tambah</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -195,61 +226,39 @@
                         @csrf
                         <input type="hidden" name="store_id" id="modal_store_id">
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Nama Produk</label>
-                                    <input type="text" name="name" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">SKU</label>
-                                    <input type="text" name="sku" class="form-control">
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Produk</label>
+                            <input type="text" name="name" class="form-control" required>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Kategori</label>
-                                    <select name="category_id" id="modal_category_select" class="form-select" required>
-                                        <option value="">Pilih Kategori...</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select name="status" class="form-select">
-                                        <option value="1">Aktif</option>
-                                        <option value="0">Nonaktif</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">SKU</label>
+                            <input type="text" name="sku" class="form-control">
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Harga</label>
-                                    <input type="number" name="price" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Stok</label>
-                                    <input type="number" name="stock" class="form-control" value="0" required>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+                            <select name="category_id" id="modal_category_select" class="form-select" required>
+                                <option value="">Pilih Kategori...</option>
+                            </select>
                         </div>
-
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="1">Aktif</option>
+                                <option value="0">Nonaktif</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Harga</label>
+                            <input type="number" name="price" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stok</label>
+                            <input type="number" name="stock" class="form-control" value="0" required>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
                             <textarea name="description" class="form-control" rows="3"></textarea>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Gambar Produk</label>
                             <input type="hidden" name="selected_images" id="selectedImages">

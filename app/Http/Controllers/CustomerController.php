@@ -121,8 +121,8 @@ class CustomerController extends Controller
 
         // Search by name or phone
         $query->where(function($q) use ($term) {
-            $q->where('name', 'like', '%' . $term . '%')
-              ->orWhere('phone', 'like', '%' . $term . '%');
+            $q->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($term) . '%'])
+                ->orWhereRaw('LOWER(phone) LIKE ?', ['%' . strtolower($term) . '%']);
         });
 
         $customers = $query->limit(10)->get(['id', 'name', 'phone']);

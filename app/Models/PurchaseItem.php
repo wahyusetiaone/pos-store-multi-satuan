@@ -9,10 +9,12 @@ class PurchaseItem extends Model
     protected $fillable = [
         'purchase_id',
         'product_id',
+        'product_unit_id',
         'quantity',
         'price',
         'buy_price',
         'subtotal',
+        'ppn',
     ];
 
     protected $casts = [
@@ -24,6 +26,11 @@ class PurchaseItem extends Model
     public function purchase()
     {
         return $this->belongsTo(Purchase::class);
+    }
+
+    public function productUnit()
+    {
+        return $this->belongsTo(ProductUnit::class, 'product_unit_id');
     }
 
     public function product()

@@ -1,10 +1,78 @@
-// Initialize variables
+// Copy of create.js logic, fully adapted for edit
 let items = [];
+
+// Function to calculate total
+function calculateTotal() {
+    const total = items.reduce((sum, item) => sum + (item.quantity * item.buy_price), 0);
+    document.getElementById('total_amount').value = total;
+    return total;
+}
+
+// Helper: fetch product units
+function fetchProductUnits(productId) {
+    return fetch(`/product-units?product_id=${productId}`)
+        .then(res => res.json());
+}
+
+// Helper: get selected unit's conversion factor
+function getSelectedUnitConversion() {
+    const unitSelect = document.getElementById('unit_select');
+    const selected = unitSelect.options[unitSelect.selectedIndex];
+    return parseFloat(selected?.dataset.conversion || 1);
+}
+
+// Enable/disable fields
+function setFieldsState(state) {
+    document.getElementById('unit_select').disabled = !state;
+    document.getElementById('qty_input').disabled = !state;
+    document.getElementById('ppn_input').disabled = !state;
+    document.getElementById('buy_price_input').disabled = !state;
+    document.getElementById('price_input').disabled = true;
+    document.getElementById('add_item').disabled = !state;
+}
+
+// Function to render items table
+function renderItems() {
+    const itemsTable = document.getElementById('items_table');
+    itemsTable.innerHTML = items.map((item, index) => `
+        <tr>
+            <td>
+                ${item.name}
+                <input type="hidden" name="items[${index}][product_id]" value="${item.product_id}">
+            </td>
+            <td>
+                ${item.unit_name}
+                <input type="hidden" name="items[${index}][unit_id]" value="${item.unit_id}">
+            </td>
+            <td>
+                ${item.quantity}
+                <input type="hidden" name="items[${index}][quantity]" value="${item.quantity}">
+            </td>
+            <td>
+                ${item.ppn}
+                <input type="hidden" name="items[${index}][ppn]" value="${item.ppn}">
+            </td>
+            <td>
+                ${item.buy_price}
+                <input type="hidden" name="items[${index}][buy_price]" value="${item.buy_price}">
+            </td>
+            <td>
+                ${item.price}
+                <input type="hidden" name="items[${index}][price]" value="${item.price}">
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">
+                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    calculateTotal();
+}
 
 $(document).ready(function() {
     const addItemBtn = document.getElementById('add_item');
-    const itemsTable = document.getElementById('items_table');
-    const totalAmount = document.getElementById('total_amount');
     const productSelect = document.getElementById('product_select');
     const createProductModal = new bootstrap.Modal(document.getElementById('createProductModal'));
     const createProductForm = document.getElementById('createProductForm');
@@ -12,51 +80,13 @@ $(document).ready(function() {
     const modalCategorySelect = document.getElementById('modal_category_select');
     const modalStoreId = document.getElementById('modal_store_id');
 
-    // Initialize items array from existing items
-    document.querySelectorAll('#items_table tr').forEach(row => {
-        const productId = row.querySelector('input[name$="[product_id]"]').value;
-        const quantity = row.querySelector('input[name$="[quantity]"]').value;
-        const price = row.querySelector('input[name$="[price]"]').value;
-        const buyPrice = row.querySelector('input[name$="[buy_price]"]').value;
-        const name = row.querySelector('td').textContent.trim();
-
-        items.push({
-            product_id: productId,
-            name: name,
-            quantity: parseInt(quantity),
-            price: parseFloat(price),
-            buy_price: parseFloat(buyPrice)
-        });
-    });
-
     // Add store change handler to load categories
     if (storeSelect) {
         storeSelect.addEventListener('change', function() {
             if (this.value) {
                 fetchCategories(this.value);
-                updateProductList(this.value);
             }
         });
-    }
-
-    // Function to update product list based on store
-    function updateProductList(storeId) {
-        fetch(`/api/products?store_id=${storeId}`)
-            .then(response => response.json())
-            .then(data => {
-                productSelect.innerHTML = '<option value="">Pilih Produk...</option>';
-                data.forEach(product => {
-                    const option = new Option(
-                        `${product.name} (Stok: ${product.stock})`,
-                        product.id
-                    );
-                    option.dataset.name = product.name;
-                    option.dataset.price = product.price;
-                    productSelect.appendChild(option);
-                });
-                productSelect.innerHTML += '<option value="new" style="background-color: #e9ecef; font-weight: bold;">+ Tambah Produk Baru</option>';
-            })
-            .catch(error => console.error('Error:', error));
     }
 
     // Function to fetch categories by store
@@ -72,11 +102,62 @@ $(document).ready(function() {
             .catch(error => console.error('Error:', error));
     }
 
+    // Product select change
+    productSelect.addEventListener('change', function() {
+        const productId = this.value;
+        // Reset all fields
+        document.getElementById('unit_select').innerHTML = '<option value="">Pilih Satuan...</option>';
+        document.getElementById('qty_input').value = '';
+        document.getElementById('ppn_input').value = '';
+        document.getElementById('buy_price_input').value = '';
+        document.getElementById('price_input').value = '';
+        setFieldsState(false);
+        if (!productId || productId === 'new') {
+            return;
+        }
+        // Fetch product units
+        fetchProductUnits(productId).then(units => {
+            const unitSelect = document.getElementById('unit_select');
+            unitSelect.innerHTML = '<option value="">Pilih Satuan...</option>';
+            units.forEach(unit => {
+                const opt = document.createElement('option');
+                opt.value = unit.id;
+                opt.textContent = unit.unit_name;
+                opt.dataset.conversion = unit.conversion_factor;
+                unitSelect.appendChild(opt);
+            });
+            unitSelect.disabled = false;
+        });
+    });
+
+    // Unit select change
+    document.getElementById('unit_select').addEventListener('change', function() {
+        const enabled = !!this.value;
+        document.getElementById('qty_input').disabled = !enabled;
+        document.getElementById('ppn_input').disabled = !enabled;
+        document.getElementById('buy_price_input').disabled = !enabled;
+        document.getElementById('price_input').disabled = true;
+        document.getElementById('add_item').disabled = !enabled;
+        document.getElementById('qty_input').value = '';
+        document.getElementById('ppn_input').value = '';
+        document.getElementById('buy_price_input').value = '';
+        document.getElementById('price_input').value = '';
+    });
+
+    // Auto-calc price_input
+    function autoCalcPrice() {
+        const buyPrice = parseFloat(document.getElementById('buy_price_input').value) || 0;
+        const conversion = getSelectedUnitConversion();
+        document.getElementById('price_input').value = conversion > 0 ? (buyPrice / conversion).toFixed(2) : '';
+    }
+    document.getElementById('buy_price_input').addEventListener('input', autoCalcPrice);
+    document.getElementById('unit_select').addEventListener('change', autoCalcPrice);
+
     // Handle product select change
     productSelect.addEventListener('change', function() {
         if (this.value === 'new') {
             // Set store_id in modal from the selected store
-            const currentStoreId = storeSelect ? storeSelect.value : document.querySelector('input[name="store_id"]').value;
+            const currentStoreId = storeSelect ? storeSelect.value : currentStoreId;
             if (!currentStoreId) {
                 alert('Silakan pilih toko terlebih dahulu');
                 this.value = '';
@@ -103,25 +184,25 @@ $(document).ready(function() {
             body: formData,
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
+                'X-Requested-With': 'XMLHttpRequest'  // This indicates AJAX request
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 // Add new product to select options
-                const option = new Option(data.product.name + ' (Stok: ' + data.product.stock + ')', data.product.id);
-                option.dataset.name = data.product.name;
-                option.dataset.price = data.product.price;
+                const option = new Option(data.data.name + ' (Stok: ' + data.data.stock + ')', data.data.id);
+                option.dataset.name = data.data.name;
+                option.dataset.price = data.data.price;
 
                 // Insert the new option right after the first option (Pilih Produk...)
                 productSelect.insertBefore(option, productSelect.options[1]);
 
                 // Select the new product
-                productSelect.value = data.product.id;
+                productSelect.value = data.data.id;
 
                 // Set the price input
-                document.getElementById('price_input').value = data.product.price;
+                document.getElementById('price_input').value = data.data.price;
 
                 // Close modal and reset form
                 createProductModal.hide();
@@ -139,73 +220,45 @@ $(document).ready(function() {
         });
     });
 
-    // Function to calculate total
-    function calculateTotal() {
-        const total = items.reduce((sum, item) => sum + (item.quantity * item.buy_price), 0);
-        totalAmount.value = total.toFixed(2);
-        return total;
-    }
-
-    // Function to render items table
-    function renderItems() {
-        itemsTable.innerHTML = items.map((item, index) => `
-            <tr>
-                <td>
-                    ${item.name}
-                    <input type="hidden" name="items[${index}][product_id]" value="${item.product_id}">
-                </td>
-                <td>
-                    <input type="number" name="items[${index}][quantity]" class="form-control"
-                           value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
-                </td>
-                <td>
-                    <input type="number" name="items[${index}][price]" class="form-control"
-                           value="${item.price}" min="0" onchange="updatePrice(${index}, this.value)">
-                </td>
-                <td>
-                    <input type="number" name="items[${index}][buy_price]" class="form-control"
-                           value="${item.buy_price}" min="0" onchange="updateBuyPrice(${index}, this.value)">
-                </td>
-                <td>${(item.quantity * item.buy_price).toFixed(2)}</td>
-                <td>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">
-                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-        calculateTotal();
-    }
-
     // Add item to list
     addItemBtn.addEventListener('click', function() {
-        const productSelect = document.getElementById('product_select');
-        const qtyInput = document.getElementById('qty_input');
-        const priceInput = document.getElementById('price_input');
-        const buyPriceInput = document.getElementById('buy_price_input');
-
-        if (!productSelect.value || !qtyInput.value || !priceInput.value || !buyPriceInput.value) {
+        const productId = productSelect.value;
+        const productName = productSelect.options[productSelect.selectedIndex].dataset.name;
+        const unitSelect = document.getElementById('unit_select');
+        const unitId = unitSelect.value;
+        const unitName = unitSelect.options[unitSelect.selectedIndex]?.textContent || '';
+        const qty = parseInt(document.getElementById('qty_input').value);
+        const ppn = parseFloat(document.getElementById('ppn_input').value) || 0;
+        const buyPrice = parseFloat(document.getElementById('buy_price_input').value);
+        const price = parseFloat(document.getElementById('price_input').value);
+        const conversion = getSelectedUnitConversion();
+        if (!productId || !unitId || !qty || !buyPrice || !price) {
             alert('Harap isi semua field produk');
             return;
         }
-
-        const option = productSelect.options[productSelect.selectedIndex];
+        // Subtotal: (qty * buy_price) + PPN
+        const subtotal = (qty * buyPrice) + ((qty * buyPrice) * (ppn / 100));
         items.push({
-            product_id: productSelect.value,
-            name: option.dataset.name,
-            quantity: parseInt(qtyInput.value),
-            price: parseFloat(priceInput.value),
-            buy_price: parseFloat(buyPriceInput.value)
+            product_id: productId,
+            name: productName,
+            unit_id: unitId,
+            unit_name: unitName,
+            quantity: qty,
+            ppn: ppn,
+            buy_price: buyPrice,
+            price: price,
+            conversion: conversion,
+            subtotal: subtotal
         });
-
         renderItems();
-
-        // Reset inputs
+        // Reset fields
+        setFieldsState(false);
         productSelect.value = '';
-        qtyInput.value = '';
-        priceInput.value = '';
-        buyPriceInput.value = '';
+        document.getElementById('unit_select').innerHTML = '<option value="">Pilih Satuan...</option>';
+        document.getElementById('qty_input').value = '';
+        document.getElementById('ppn_input').value = '';
+        document.getElementById('buy_price_input').value = '';
+        document.getElementById('price_input').value = '';
     });
 
     // Form submit handler
@@ -224,8 +277,7 @@ $(document).ready(function() {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
         })
         .then(response => response.json())
@@ -241,24 +293,42 @@ $(document).ready(function() {
             alert('Terjadi kesalahan saat menyimpan pembelian');
         });
     });
+
+    // Handle pre-selected store and product
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelectedStoreId = urlParams.get('store_id');
+    const preSelectedProductId = urlParams.get('product_id');
+
+    if (preSelectedStoreId) {
+        const storeSelect = document.getElementById('store_id');
+        if (storeSelect) {
+            storeSelect.value = preSelectedStoreId;
+            // Trigger change event to load categories if needed
+            storeSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    if (preSelectedProductId) {
+        const productSelect = document.getElementById('product_select');
+        if (productSelect) {
+            productSelect.value = preSelectedProductId;
+            // Add the product to the table automatically
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const productName = selectedOption.getAttribute('data-name');
+            const productPrice = selectedOption.getAttribute('data-price');
+
+            // Set default values
+            document.getElementById('qty_input').value = '1';
+            document.getElementById('price_input').value = productPrice;
+            document.getElementById('buy_price_input').value = productPrice;
+
+            // Click the add button automatically
+            document.getElementById('add_item').click();
+        }
+    }
 });
 
-// Global functions for item management
-window.updateQuantity = function(index, value) {
-    items[index].quantity = parseInt(value);
-    renderItems();
-};
-
-window.updatePrice = function(index, value) {
-    items[index].price = parseFloat(value);
-    renderItems();
-};
-
-window.updateBuyPrice = function(index, value) {
-    items[index].buy_price = parseFloat(value);
-    renderItems();
-};
-
+// Global function for remove item (needs to be global for onclick handler)
 window.removeItem = function(index) {
     items.splice(index, 1);
     renderItems();

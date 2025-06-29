@@ -67,9 +67,11 @@ class PurchaseController extends Controller
                 'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
+                'items.*.product_unit_id' => 'required|exists:product_unit,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.price' => 'required|numeric|min:0',
                 'items.*.buy_price' => 'required|numeric|min:0',
+                'items.*.ppn' => 'nullable|numeric',
             ]);
 
             // Set store_id based on user access
@@ -95,10 +97,12 @@ class PurchaseController extends Controller
                 PurchaseItem::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $item['product_id'],
+                    'product_unit_id' => $item['product_unit_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'buy_price' => $item['buy_price'],
-                    'subtotal' => $item['quantity'] * $item['buy_price']
+                    'subtotal' => $item['quantity'] * $item['buy_price'],
+                    'ppn' => $item['ppn'] ?? 0,
                 ]);
             }
 
@@ -154,8 +158,36 @@ class PurchaseController extends Controller
             'shipping_date' => 'date|nullable',
             'total' => 'numeric',
             'note' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_unit_id' => 'required|exists:product_units,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.buy_price' => 'required|numeric|min:0',
+            'items.*.ppn' => 'nullable|numeric',
         ]);
-        $purchase->update($validated);
+        $purchase->update([
+            'user_id' => $request->user_id,
+            'purchase_date' => $request->purchase_date,
+            'supplier' => $request->supplier,
+            'status' => $request->status,
+            'total' => $request->total,
+            'note' => $request->note,
+        ]);
+        // Hapus item lama dan simpan ulang item baru
+        $purchase->items()->delete();
+        foreach ($request->items as $item) {
+            PurchaseItem::create([
+                'purchase_id' => $purchase->id,
+                'product_id' => $item['product_id'],
+                'product_unit_id' => $item['product_unit_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+                'buy_price' => $item['buy_price'],
+                'subtotal' => $item['quantity'] * $item['buy_price'],
+                'ppn' => $item['ppn'] ?? 0,
+            ]);
+        }
         return redirect()->route('purchases.index')->with('success', 'Pembelian berhasil diubah.');
     }
 

@@ -129,19 +129,29 @@ class SaleController extends Controller
 
             // Create sale items
             foreach ($request->items as $item) {
-                SaleItem::create([
+                // Ambil variant
+                $variant = \App\Models\ProductVariant::with('productUnit')->find($item['id']);
+                if (!$variant) {
+                    throw new \Exception('Variant tidak ditemukan');
+                }
+                $conversionFactor = $variant->productUnit ? $variant->productUnit->conversion_factor : 1;
+                $quantityConversion = $variant->qty * $conversionFactor;
+                $grandQuantityConversion = $item['quantity'] * $conversionFactor;
+                // Simpan sale item
+                $saleItem = \App\Models\SaleItem::create([
                     'sale_id' => $sale->id,
-                    'product_id' => $item['id'],
+                    'variant_id' => $variant->id,
+                    'product_id' => $variant->product_id,
                     'quantity' => $item['quantity'],
+                    'quantity_conversion' => $grandQuantityConversion,
                     'price' => $item['price'],
                     'discount' => $item['discount'] ?? 0,
                     'subtotal' => ($item['quantity'] * $item['price']) - ($item['discount'] ?? 0),
                 ]);
-
-                // Update product stock
-                $product = Product::find($item['id']);
+                // Update stock produk utama
+                $product = \App\Models\Product::find($variant->product_id);
                 if ($product) {
-                    $product->decrement('stock', $item['quantity']);
+                    $product->decrement('stock', $grandQuantityConversion);
                 }
             }
 
@@ -177,7 +187,12 @@ class SaleController extends Controller
     {
         $customers = Customer::all();
         $users = User::all();
-        return view('sales.edit', compact('sale', 'customers', 'users'));
+        $stores = [];
+        if (auth()->user()->hasGlobalAccess()) {
+            $stores = Store::where('is_active', true)->get();
+        }
+
+        return view('sales.edit', compact('stores','sale', 'customers', 'users'));
     }
 
     /**

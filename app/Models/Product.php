@@ -11,6 +11,7 @@ class Product extends Model
     protected $fillable = [
         'store_id', // dari migration alter table
         'category_id',
+        'default_unit_id',
         'name',
         'sku',
         'price',
@@ -38,5 +39,18 @@ class Product extends Model
     public function saleItems()
     {
         return $this->hasMany(SaleItem::class);
+    }
+
+    public function defaultUnit()
+    {
+        return $this->belongsTo(Unit::class, 'default_unit_id');
+    }
+
+    public function units()
+    {
+        return $this->belongsToMany(Unit::class, 'product_unit')
+            ->withPivot('conversion_factor')
+            ->using(ProductUnit::class)
+            ->withTimestamps();
     }
 }

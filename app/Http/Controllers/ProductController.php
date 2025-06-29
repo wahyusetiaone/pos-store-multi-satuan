@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
 use App\Models\Store;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -87,16 +88,15 @@ class ProductController extends Controller
     {
         $categories = Category::query();
         $stores = [];
-
+        $units = Unit::all();
         if (auth()->user()->hasGlobalAccess()) {
             $stores = Store::where('is_active', true)->get();
         } else {
             // Filter categories by current store
             $categories->where('store_id', auth()->user()->current_store_id);
         }
-
         $categories = $categories->get();
-        return view('products.create', compact('categories', 'stores'));
+        return view('products.create', compact('categories', 'stores', 'units'));
     }
 
     public function store(Request $request)
@@ -110,18 +110,32 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'status' => 'required|boolean',
             'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited',
-            'selected_images' => 'nullable|json'
+            'selected_images' => 'nullable|json',
+            'default_unit_id' => 'required|exists:units,id',
+            'product_units' => 'nullable|array',
+            'product_units.*.unit_id' => 'required_with:product_units|exists:units,id',
+            'product_units.*.conversion_factor' => 'required_with:product_units|numeric|min:0.0001',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Set store_id based on user access
             if (!auth()->user()->hasGlobalAccess()) {
                 $validated['store_id'] = auth()->user()->current_store_id;
             }
-            // Create product
-            $product = Product::create(collect($validated)->except(['selected_images'])->toArray());
+            $product = Product::create(collect($validated)->except(['selected_images', 'product_units'])->toArray());
+
+            // Handle product units (pivot)
+            if ($request->has('product_units')) {
+                $syncData = [];
+                foreach ($request->product_units as $unitRow) {
+                    if (!empty($unitRow['unit_id']) && !empty($unitRow['conversion_factor'])) {
+                        $syncData[$unitRow['unit_id']] = ['conversion_factor' => $unitRow['conversion_factor']];
+                    }
+                }
+                $product->units()->sync($syncData);
+            }
+
             // Handle selected images from gallery
             if ($request->selected_images) {
                 $selectedImages = json_decode($request->selected_images, true);
@@ -168,7 +182,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        $units = Unit::all();
+        return view('products.edit', compact('product', 'categories', 'units'));
     }
 
     public function update(Request $request, Product $product)
@@ -181,14 +196,28 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
             'status' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048',
+            'default_unit_id' => 'required|exists:units,id',
+            'product_units' => 'nullable|array',
+            'product_units.*.unit_id' => 'required_with:product_units|exists:units,id',
+            'product_units.*.conversion_factor' => 'required_with:product_units|numeric|min:0.0001',
         ]);
 
-        // Remove image from validated data as we'll handle it separately
-        $productData = collect($validated)->except(['image'])->toArray();
-
-        // Update product
+        $productData = collect($validated)->except(['image', 'product_units'])->toArray();
         $product->update($productData);
+
+        // Handle product units (pivot)
+        if ($request->has('product_units')) {
+            $syncData = [];
+            foreach ($request->product_units as $unitRow) {
+                if (!empty($unitRow['unit_id']) && !empty($unitRow['conversion_factor'])) {
+                    $syncData[$unitRow['unit_id']] = ['conversion_factor' => $unitRow['conversion_factor']];
+                }
+            }
+            $product->units()->sync($syncData);
+        } else {
+            $product->units()->detach();
+        }
 
         // Handle image upload
         if ($request->hasFile('image')) {

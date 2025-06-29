@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComponentpageController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -159,10 +161,16 @@ Route::middleware(['auth', 'store.access'])->group(function () {
 
     // Voucher routes
     Route::get('/api/vouchers/check', [App\Http\Controllers\VoucherController::class, 'check'])->name('vouchers.check');
+    Route::resource('vouchers', VoucherController::class);
 
     // Payment AR History routes
     Route::post('/payment-ar-histories', [App\Http\Controllers\PaymentARHistoryController::class, 'store'])->name('payment-ar-histories.store');
     Route::get('/payment-ar-histories/{accountReceivable}', [App\Http\Controllers\PaymentARHistoryController::class, 'getHistory'])->name('payment-ar-histories.history');
+
+    // Unit routes
+    Route::resource('units', UnitController::class);
+    Route::get('product-units', [\App\Http\Controllers\UnitController::class, 'productUnits']);
+    Route::resource('product-variants', App\Http\Controllers\ProductVariantController::class);
 });
 
 // Store Selection Routes
@@ -186,4 +194,3 @@ Route::get('/shop/{product}', [ShopController::class, 'show'])->name('shop.show'
 
 
 require __DIR__.'/auth.php';
-

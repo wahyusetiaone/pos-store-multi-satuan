@@ -48,17 +48,21 @@
 
                     <!-- Products Grid -->
                     <div class="row" id="productsGrid">
-                        @foreach($products as $product)
+                        @foreach($variants as $variant)
                         <div class="col-md-3 mb-3">
                             <div class="card h-100 product-card cursor-pointer"
-                                data-product-id="{{ $product->id }}"
-                                data-category-id="{{ $product->category_id }}">
-                                <img src="{{ $product->images->first() ? asset('storage/' . $product->images->first()->image_path) : asset('assets/images/no-image.png') }}"
-                                     class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                                data-variant-id="{{ $variant->id }}"
+                                data-product-id="{{ $variant->product->id ?? '' }}"
+                                data-category-id="{{ $variant->product->category_id ?? '' }}">
+                                <img src="{{ $variant->product->images->first() ? asset('storage/' . $variant->product->images->first()->image_path) : asset('assets/images/no-image.png') }}"
+                                     class="card-img-top" alt="{{ $variant->product->name ?? '-' }}" style="height: 200px; object-fit: cover;">
                                 <div class="card-body">
-                                    <h6 class="card-title m-0 p-0">{{ $product->name }}</h6>
-                                    <p class="card-text text-primary m-0 p-0">Rp {{ number_format($product->price, 0, ',', '.') }},-</p>
-                                    <p class="card-text small m-0 p-0">STOK: {{ $product->stock }}x</p>
+                                    <h6 class="card-title m-0 p-0">{{ $variant->product->name ?? '-' }} <span class="badge bg-secondary">{{ $variant->name }}</span></h6>
+                                    <p class="card-text text-primary m-0 p-0">Rp {{ number_format($variant->price, 0, ',', '.') }},-</p>
+                                    <p class="card-text small m-0 p-0">STOK: {{ $variant->qty }}x</p>
+                                    @if($variant->productUnit && $variant->productUnit->unit)
+                                        <p class="card-text small m-0 p-0">Satuan: {{ $variant->productUnit->unit->name }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

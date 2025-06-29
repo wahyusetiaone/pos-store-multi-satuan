@@ -9,12 +9,14 @@ class ShippingItem extends Model
     protected $fillable = [
         'shipping_id',
         'product_id',
+        'product_unit_id',
         'quantity',
         'qty_received',
         'note',
         'price',
         'buy_price',
-        'subtotal'
+        'subtotal',
+        'ppn',
     ];
 
     protected $casts = [
@@ -26,6 +28,11 @@ class ShippingItem extends Model
     public function shipping()
     {
         return $this->belongsTo(Shipping::class);
+    }
+
+    public function productUnit()
+    {
+        return $this->belongsTo(ProductUnit::class, 'product_unit_id');
     }
 
     public function product()

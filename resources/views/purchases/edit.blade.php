@@ -59,39 +59,10 @@
                         </div>
 
                         <!-- Product Selection -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Tambah Produk</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <select id="product_select" class="form-select">
-                                            <option value="">Pilih Produk...</option>
-                                            @foreach(App\Models\Product::where('store_id', $purchase->store_id)->get() as $product)
-                                                <option value="{{ $product->id }}"
-                                                        data-name="{{ $product->name }}"
-                                                        data-price="{{ $product->price }}">
-                                                    {{ $product->name }} (Stok: {{ $product->stock }})
-                                                </option>
-                                            @endforeach
-                                            <option value="new" style="background-color: #e9ecef; font-weight: bold;">+ Tambah Produk Baru</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="qty_input" class="form-control" placeholder="Jumlah" min="1">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="number" id="buy_price_input" class="form-control" placeholder="Harga Beli" min="0">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="button" class="btn btn-primary w-100" id="add_item">Tambah</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                <i class="fas fa-plus"></i> Tambah Produk
+                            </button>
                         </div>
 
                         <!-- Items Table -->
@@ -100,10 +71,11 @@
                                 <thead>
                                 <tr>
                                     <th>Produk</th>
-                                    <th width="100">Jumlah</th>
-                                    <th width="150">Harga Jual</th>
-                                    <th width="150">Harga Beli</th>
-                                    <th width="150">Subtotal</th>
+                                    <th>Satuan</th>
+                                    <th width="80">Jumlah</th>
+                                    <th width="80">PPN (%)</th>
+                                    <th width="120">Harga Beli</th>
+                                    <th width="120">Harga Jual</th>
                                     <th width="50">Aksi</th>
                                 </tr>
                                 </thead>
@@ -115,15 +87,21 @@
                                             <input type="hidden" name="items[{{ $loop->index }}][product_id]" value="{{ $item->product_id }}">
                                         </td>
                                         <td>
+                                            {{ $item->productUnit->unit->name }}
+                                            <input type="hidden" name="items[{{ $loop->index }}][product_unit_id]" value="{{ $item->product_unit_id }}">
+                                        </td>
+                                        <td>
                                             <input type="number" name="items[{{ $loop->index }}][quantity]" class="form-control" value="{{ $item->quantity }}" min="1">
                                         </td>
                                         <td>
-                                            <input type="number" name="items[{{ $loop->index }}][price]" class="form-control" value="{{ $item->price }}" min="0">
+                                            <input type="number" name="items[{{ $loop->index }}][ppn]" class="form-control" value="{{ $item->ppn }}" min="0">
                                         </td>
                                         <td>
                                             <input type="number" name="items[{{ $loop->index }}][buy_price]" class="form-control" value="{{ $item->buy_price }}" min="0">
                                         </td>
-                                        <td>{{ number_format($item->subtotal, 2) }}</td>
+                                        <td>
+                                            <input type="number" name="items[{{ $loop->index }}][price]" class="form-control" value="{{ $item->price }}" min="0">
+                                        </td>
                                         <td>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">
                                                 <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
@@ -134,13 +112,14 @@
                                 </tbody>
                                 <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                                    <td colspan="5" class="text-end fw-bold">Total:</td>
                                     <td colspan="2">
                                         <input type="number" name="total" id="total_amount" class="form-control" value="{{ $purchase->total }}" readonly>
                                     </td>
                                 </tr>
                                 </tfoot>
                             </table>
+                            <small class="form-text text-muted">* Harga jual adalah harga jual per satuan dasar, dan tidak mempengaruhi harga penjualan serta dapat diubah pada halaman management produk.</small>
                         </div>
 
                         <div class="mb-3">
@@ -153,6 +132,62 @@
                             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Produk -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Tambah Produk ke Daftar Pembelian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Produk</label>
+                        <select id="product_select" class="form-select">
+                            <option value="">Pilih Produk...</option>
+                            @foreach(App\Models\Product::where('store_id', $purchase->store_id)->get() as $product)
+                                <option value="{{ $product->id }}"
+                                        data-name="{{ $product->name }}"
+                                        data-price="{{ $product->price }}">
+                                    {{ $product->name }} (Stok: {{ $product->stock }} {{ $product->defaultUnit->name }})
+                                </option>
+                            @endforeach
+                            <option value="new" style="background-color: #e9ecef; font-weight: bold;">+ Tambah Produk Baru</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Satuan Pembelian</label>
+                        <select id="unit_select" class="form-select" disabled>
+                            <option value="">Pilih Satuan...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Pembelian</label>
+                        <input type="number" id="qty_input" class="form-control" placeholder="Jumlah" min="1" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PPN (%)</label>
+                        <input type="number" id="ppn_input" class="form-control" placeholder="PPN %" min="0" max="100" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Harga Beli</label>
+                        <small class="form-text text-muted"> sudah termasuk PPN</small>
+                        <input type="number" id="buy_price_input" class="form-control" placeholder="Harga Beli" min="0" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Harga Jual</label>
+                        <small class="form-text text-muted"> dalam satuan dasar</small>
+                        <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0" disabled readonly>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-primary w-100" id="add_item" disabled data-bs-dismiss="modal">Tambah</button>
+                    </div>
                 </div>
             </div>
         </div>

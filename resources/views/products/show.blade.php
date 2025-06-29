@@ -135,6 +135,15 @@
                                 <input type="text" class="form-control" value="{{ $product->status ? 'Aktif' : 'Tidak Aktif' }}" readonly>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Satuan Default</label>
+                            <div class="icon-field">
+                                <span class="icon">
+                                    <iconify-icon icon="mdi:ruler"></iconify-icon>
+                                </span>
+                                <input type="text" class="form-control" value="{{ $product->defaultUnit->name ?? '-' }}" readonly>
+                            </div>
+                        </div>
                         <div class="col-md-12">
                             <label class="form-label">Deskripsi</label>
                             <textarea class="form-control" rows="2" readonly>{{ $product->description }}</textarea>
@@ -219,6 +228,40 @@
             </div>
         </div>
         @endif
+
+        {{-- details satuan produk --}}
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Satuan Produk & Konversi</h5>
+                    <span class="text-muted">Daftar satuan dan faktor konversi produk ini</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Satuan</th>
+                                    <th>Faktor Konversi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($product->units as $unit)
+                                    <tr>
+                                        <td>{{ $unit->name }}</td>
+                                        <td>{{ $unit->pivot->conversion_factor_cash }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="2" class="text-center">Belum ada satuan tambahan</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

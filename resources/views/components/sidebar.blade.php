@@ -30,17 +30,29 @@
 
             @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'purchasing')
             <li>
-                <a href="{{ route('products.index') }}">
-                    <iconify-icon icon="mdi:package-variant" class="menu-icon"></iconify-icon>
-                    <span>Produk</span>
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('categories.index') }}">
                     <iconify-icon icon="mdi:shape-outline" class="menu-icon"></iconify-icon>
                     <span>Kategori</span>
                 </a>
             </li>
+                <li>
+                    <a href="{{ route('units.index') }}">
+                        <iconify-icon icon="mdi:scale-balance" class="menu-icon"></iconify-icon>
+                        <span>Satuan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.index') }}">
+                        <iconify-icon icon="mdi:package-variant" class="menu-icon"></iconify-icon>
+                        <span>Produk</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('product-variants.index') }}">
+                        <iconify-icon icon="mdi:format-list-bulleted-square" class="menu-icon"></iconify-icon>
+                        <span>Varian Produk</span>
+                    </a>
+                </li>
             @endif
 
             @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'cashier')
@@ -118,6 +130,12 @@
                 </a>
             </li>
             @endif
+            <li>
+                <a href="{{ route('vouchers.index') }}">
+                    <iconify-icon icon="mdi:ticket-percent-outline" class="menu-icon"></iconify-icon>
+                    <span>Voucher</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>

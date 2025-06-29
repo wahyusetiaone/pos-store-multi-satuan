@@ -58,9 +58,11 @@ class ShippingController extends Controller
                 'note' => 'nullable|string',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
+                'items.*.product_unit_id' => 'required|exists:product_unit,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.price' => 'required|numeric|min:0',
                 'items.*.buy_price' => 'required|numeric|min:0',  // Tambahkan validasi buy_price
+                'items.*.ppn' => 'nullable|numeric',
             ]);
 
             // Get purchase data
@@ -85,10 +87,12 @@ class ShippingController extends Controller
                 ShippingItem::create([
                     'shipping_id' => $shipping->id,
                     'product_id' => $item['product_id'],
+                    'product_unit_id' => $item['product_unit_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
-                    'buy_price' => $item['buy_price'],  // Tambahkan buy_price
-                    'subtotal' => $item['quantity'] * $item['price']
+                    'buy_price' => $item['buy_price'],
+                    'subtotal' => $item['quantity'] * $item['price'],
+                    'ppn' => $item['ppn'] ?? 0,
                 ]);
             }
 
@@ -137,10 +141,30 @@ class ShippingController extends Controller
             'supplier' => 'required|string|max:255',
             'total' => 'required|numeric',
             'note' => 'nullable|string',
-            'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited'
+            'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_unit_id' => 'required|exists:product_unit,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.buy_price' => 'required|numeric|min:0',
+            'items.*.ppn' => 'nullable|numeric',
         ]);
-
         $shipping->update($validated);
+        // Hapus item lama dan simpan ulang item baru
+        $shipping->items()->delete();
+        foreach ($request->items as $item) {
+            ShippingItem::create([
+                'shipping_id' => $shipping->id,
+                'product_id' => $item['product_id'],
+                'product_unit_id' => $item['product_unit_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+                'buy_price' => $item['buy_price'],
+                'subtotal' => $item['quantity'] * $item['price'],
+                'ppn' => $item['ppn'] ?? 0,
+            ]);
+        }
         return redirect()->route('shippings.index')->with('success', 'Pengiriman berhasil diubah.');
     }
 

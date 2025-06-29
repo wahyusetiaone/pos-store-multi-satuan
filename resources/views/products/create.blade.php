@@ -5,6 +5,7 @@
     $script = '
         <script src="' . asset('assets/js/pages/gallery-modal.js') . '"></script>
         <script src="' . asset('assets/js/pages/product/create.js') . '"></script>
+        <script src="' . asset('assets/js/pages/product/product-units.js') . '"></script>
     ';
 @endphp
 
@@ -98,18 +99,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">SKU</label>
-                                <input type="text" name="sku" class="form-control @error('sku') is-invalid @enderror" value="{{ old('sku') }}">
-                                @error('sku')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Kategori</label>
@@ -122,18 +112,33 @@
                                     @endforeach
                                 </select>
                                 @error('category_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Satuan Default</label>
+                                <select name="default_unit_id" class="form-select @error('default_unit_id') is-invalid @enderror" required>
+                                    <option value="">Pilih Satuan...</option>
+                                    @foreach($units as $unit)
+                                        <option value="{{ $unit->id }}" {{ old('default_unit_id') == $unit->id ? 'selected' : '' }}>{{ $unit->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('default_unit_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                    <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Aktif</option>
-                                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Nonaktif</option>
-                                </select>
-                                @error('status')
+                                <label class="form-label">SKU</label>
+                                <input type="text" name="sku" class="form-control @error('sku') is-invalid @enderror" value="{{ old('sku') }}">
+                                @error('sku')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -160,6 +165,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select @error('status') is-invalid @enderror">
+                                <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Aktif</option>
+                                <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Nonaktif</option>
+                            </select>
+                            @error('status')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label">Deskripsi</label>
@@ -178,6 +195,31 @@
                             </button>
                         </div>
                         <div class="selected-images" id="selectedImagesPreview"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Satuan Produk & Konversi</label>
+                        <div id="product-units-list">
+                            <div class="row align-items-end mb-2 product-unit-row">
+                                <div class="col-md-5">
+                                    <label class="form-label">Satuan</label>
+                                    <select name="product_units[0][unit_id]" class="form-select" required>
+                                        <option value="">Pilih Satuan...</option>
+                                        @foreach($units as $unit)
+                                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label">Faktor Konversi</label>
+                                    <input type="number" step="0.0001" min="0.0001" name="product_units[0][conversion_factor]" class="form-control" placeholder="1" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-success add-unit-row w-100">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted">Tambahkan satuan lain beserta faktor konversinya (misal: 1 Dus = 12 Pcs, dst).</small>
                     </div>
 
                     <div class="text-end">

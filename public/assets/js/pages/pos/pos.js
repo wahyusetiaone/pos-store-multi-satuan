@@ -1,3 +1,34 @@
+// Modern toast notification using Bootstrap
+function showToast(message, type = 'info') {
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0 show mb-2`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+    }, 5000); // Auto-dismiss after 5 seconds
+    toast.querySelector('.btn-close').onclick = () => toast.remove();
+}
+
 // POS Cart Management
 const cart = {
     items: [],
@@ -13,33 +44,33 @@ const cart = {
     voucherCode: null,
     voucherDiscount: 0,
 
-    addItem(product) {
-        const existingItem = this.items.find(item => item.id === product.id);
+    addItem(variant) {
+        const existingItem = this.items.find(item => item.id === variant.id);
         if (existingItem) {
             existingItem.quantity++;
         } else {
             this.items.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
+                id: variant.id,
+                name: `${variant.name}`,
+                price: variant.price,
                 quantity: 1,
-                stock: product.stock
+                stock: variant.qty
             });
         }
         this.updateCart();
     },
 
-    removeItem(productId) {
-        this.items = this.items.filter(item => item.id !== productId);
+    removeItem(variantId) {
+        this.items = this.items.filter(item => item.id !== variantId);
         this.updateCart();
     },
 
-    updateItemQuantity(productId, quantity) {
-        const item = this.items.find(item => item.id === productId);
+    updateItemQuantity(variantId, quantity) {
+        const item = this.items.find(item => item.id === variantId);
         if (item) {
             item.quantity = parseInt(quantity);
             if (item.quantity <= 0) {
-                this.removeItem(productId);
+                this.removeItem(variantId);
             }
         }
         this.updateCart();
@@ -79,18 +110,18 @@ const cart = {
                 <td>${item.name}</td>
                 <td>
                     <div class="input-group input-group-sm" style="width: 120px;">
-                        <button class="btn btn-outline-secondary btn-decrease" type="button" data-product-id="${item.id}" data-quantity="${item.quantity - 1}">-</button>
+                        <button class="btn btn-outline-secondary btn-decrease" type="button" data-variant-id="${item.id}" data-quantity="${item.quantity - 1}">-</button>
                         <input type="number" class="form-control text-center quantity-input"
                             value="${item.quantity}"
-                            data-product-id="${item.id}"
+                            data-variant-id="${item.id}"
                             min="1"
                             max="${item.stock}">
-                        <button class="btn btn-outline-secondary btn-increase" type="button" data-product-id="${item.id}" data-quantity="${newQuantity}">+</button>
+                        <button class="btn btn-outline-secondary btn-increase" type="button" data-variant-id="${item.id}" data-quantity="${newQuantity}">+</button>
                     </div>
                 </td>
                 <td>Rp ${item.price.toLocaleString()},-</td>
                 <td>
-                    <button class="btn btn-sm btn-danger btn-remove" data-product-id="${item.id}">
+                    <button class="btn btn-sm btn-danger btn-remove" data-variant-id="${item.id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -232,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('applyVoucher').addEventListener('click', async function() {
         const voucherCode = document.querySelector('input[name="voucher_code"]').value.trim();
         if (!voucherCode) {
-            alert('Masukkan kode voucher terlebih dahulu!');
+            showToast('Masukkan kode voucher terlebih dahulu!', 'info');
             return;
         }
 
@@ -250,23 +281,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 cart.voucherCode = voucherCode;
                 cart.voucherDiscount = data.discount_amount || 0;
                 cart.updateCart();
-                alert('Voucher berhasil diterapkan!');
+                showToast('Voucher berhasil diterapkan!', 'success');
             } else {
+                console.log(response)
                 cart.voucherCode = null;
                 cart.voucherDiscount = 0;
                 cart.updateCart();
-                alert(data.message || 'Voucher tidak valid!');
+                showToast(data.message || 'Voucher tidak valid!', 'danger');
             }
         } catch (error) {
             console.error('Error checking voucher:', error);
-            alert('Gagal memeriksa voucher. Silakan coba lagi.');
+            showToast('Gagal memeriksa voucher. Silakan coba lagi.', 'danger');
         }
     });
 
     // Save transaction button handler
     document.getElementById('saveTransaction').addEventListener('click', async function() {
         if (cart.items.length === 0) {
-            alert('Keranjang kosong!');
+            showToast('Keranjang kosong!', 'danger');
             return;
         }
 
@@ -275,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check if payment is less than grand total (piutang) but no customer selected
         if (paymentAmount < grandTotal && !cart.customerId) {
-            alert('Transaksi dengan pembayaran kurang dari total (piutang) wajib memilih customer!');
+            showToast('Transaksi dengan pembayaran kurang dari total (piutang) wajib memilih customer!', 'info');
             return;
         }
 
@@ -306,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert('Transaksi berhasil disimpan!');
+                showToast('Transaksi berhasil disimpan!', 'success');
                 cart.clear();
                 // window.location.href = `/sales/${result.data.id}`;
             } else {
@@ -314,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(errorData.message || 'Gagal menyimpan transaksi');
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            showToast('Error: ' + error.message, 'danger');
         }
     });
 
@@ -355,13 +387,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Product card click handler - Update to include category ID attribute
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', function() {
-            const product = {
-                id: this.dataset.productId,
+            const variant = {
+                id: this.dataset.variantId,
                 name: this.querySelector('.card-title').textContent,
                 price: parseFloat(this.querySelector('.text-primary').textContent.replace(/[^0-9]/g, '')),
                 stock: parseInt(this.querySelector('.card-text.small').textContent.match(/\d+/)[0])
             };
-            cart.addItem(product);
+            cart.addItem(variant);
         });
     });
 
@@ -453,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     throw new Error(error.message || 'Failed to create customer');
                                 }
                             } catch (error) {
-                                alert('Error creating customer: ' + error.message);
+                                showToast('Error creating customer: ' + error.message, 'error');
                             }
                         });
                         customerSearchResults.classList.remove('d-none');

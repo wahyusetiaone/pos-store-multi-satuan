@@ -101,12 +101,13 @@ class SaleExport implements FromCollection, WithHeadings, WithMapping, WithEvent
                 ];
             }
 
+            $variantProductName = $item->variant && $item->variant->name ? $item->variant->name . ' [' . $item->product->name . ']' : '-';
             $row = [
                 $sale->sale_date->format('d/m/Y H:i'),
                 $sale->id,
                 $sale->store->name ?? '-',
                 $sale->customer->name ?? 'Umum',
-                $item->product->name,
+                $variantProductName,
                 $item->quantity,
                 $item->price,
                 $item->discount,

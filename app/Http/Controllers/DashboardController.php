@@ -194,20 +194,27 @@ class DashboardController extends Controller
 
     public function pos()
     {
-        // Base queries
-        $productsQuery = Product::with(['category', 'images']);
+        // Ambil data ProductVariant beserta relasi produk, kategori, gambar, unit
+        $variantsQuery = \App\Models\ProductVariant::with([
+            'product.category',
+            'product.images',
+            'product',
+            'productUnit.unit',
+        ]);
         $categoriesQuery = Category::query();
 
-        // Filter by store if user doesn't have global access
+        // Filter by store jika user tidak punya global access
         if (!auth()->user()->hasGlobalAccess()) {
             $storeId = auth()->user()->current_store_id;
-            $productsQuery->where('store_id', $storeId);
+            $variantsQuery->whereHas('product', function($q) use ($storeId) {
+                $q->where('store_id', $storeId);
+            });
             $categoriesQuery->where('store_id', $storeId);
         }
 
-        $products = $productsQuery->get();
+        $variants = $variantsQuery->get();
         $categories = $categoriesQuery->get();
 
-        return view('dashboard.pos', compact('products', 'categories'));
+        return view('dashboard.pos', compact('variants', 'categories'));
     }
 }

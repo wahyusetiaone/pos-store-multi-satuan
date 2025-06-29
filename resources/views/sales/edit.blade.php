@@ -69,7 +69,7 @@
                             <tbody>
                                 @foreach($sale->items as $item)
                                     <tr>
-                                        <td>{{ $item->product->name }}</td>
+                                        <td>{{ $item->variant->name }} [{{ $item->product->name }}]</td>
                                         <td>{{ $item->quantity }}</td>
                                         <td>{{ number_format($item->price, 0, ',', '.') }}</td>
                                         <td>{{ number_format($item->discount, 0, ',', '.') }}</td>
