@@ -174,8 +174,12 @@
                                 <span>Pembayaran:</span>
                                 <div class="input-group input-group-sm w-50">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" name="payment_amount" class="form-control form-control-sm" value="0" min="0">
+                                    <input type="number" name="payment_amount" class="form-control form-control-sm" value="0" min="0" id="paymentAmount">
                                 </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Kembalian:</span>
+                                <span class="fw-bold text-end" id="changeAmount">Rp 0,-</span>
                             </div>
                         </div>
 
@@ -222,5 +226,5 @@
 @endpush
 
 @push('scripts')
-<script src="{{ asset('assets/js/pages/pos/pos.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/pos/pos.js') }}"></script>
 @endpush

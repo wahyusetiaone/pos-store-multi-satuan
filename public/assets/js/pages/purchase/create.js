@@ -80,6 +80,46 @@ $(document).ready(function() {
     const modalCategorySelect = document.getElementById('modal_category_select');
     const modalStoreId = document.getElementById('modal_store_id');
 
+    // --- PPN Checkbox Logic & Buy Price PPN Calculation ---
+    const ppnCheckbox = document.getElementById('ppn_checkbox');
+    const ppnInput = document.getElementById('ppn_input');
+    const buyPriceInput = document.getElementById('buy_price_input');
+    const buyPriceInputPPN = document.getElementById('buy_price_input_ppn');
+    const buyPriceInputPPNGroup = document.getElementById('buy_price_input_ppn_group');
+
+    function updatePPNState() {
+        if (ppnCheckbox.checked) {
+            ppnInput.value = 11;
+            buyPriceInputPPNGroup.style.display = '';
+            buyPriceInputPPN.disabled = false;
+            // Kalkulasi harga beli + PPN
+            const base = parseFloat(buyPriceInput.value) || 0;
+            const ppn = parseFloat(ppnInput.value) || 0;
+            buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+        } else {
+            ppnInput.value = 0;
+            buyPriceInputPPNGroup.style.display = 'none';
+            buyPriceInputPPN.value = '';
+            buyPriceInputPPN.disabled = true;
+        }
+    }
+    if (ppnCheckbox && ppnInput && buyPriceInput && buyPriceInputPPN && buyPriceInputPPNGroup) {
+        ppnCheckbox.addEventListener('change', function() {
+            updatePPNState();
+            autoCalcPrice();
+        });
+        buyPriceInput.addEventListener('input', function() {
+            if (ppnCheckbox.checked) {
+                const base = parseFloat(buyPriceInput.value) || 0;
+                const ppn = parseFloat(ppnInput.value) || 0;
+                buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+            }
+            autoCalcPrice();
+        });
+        buyPriceInputPPN.addEventListener('input', autoCalcPrice);
+    }
+    // --- END PPN Checkbox Logic ---
+
     // Add store change handler to load categories
     if (storeSelect) {
         storeSelect.addEventListener('change', function() {
@@ -146,12 +186,29 @@ $(document).ready(function() {
 
     // Auto-calc price_input
     function autoCalcPrice() {
-        const buyPrice = parseFloat(document.getElementById('buy_price_input').value) || 0;
+        let buyPrice = 0;
+        if (ppnCheckbox.checked) {
+            buyPrice = parseFloat(buyPriceInputPPN.value) || 0;
+        } else {
+            buyPrice = parseFloat(buyPriceInput.value) || 0;
+        }
         const conversion = getSelectedUnitConversion();
         document.getElementById('price_input').value = conversion > 0 ? (buyPrice / conversion).toFixed(2) : '';
     }
-    document.getElementById('buy_price_input').addEventListener('input', autoCalcPrice);
+    buyPriceInput.addEventListener('input', function() {
+        if (ppnCheckbox.checked) {
+            const base = parseFloat(buyPriceInput.value) || 0;
+            const ppn = parseFloat(ppnInput.value) || 0;
+            buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+        }
+        autoCalcPrice();
+    });
+    buyPriceInputPPN.addEventListener('input', autoCalcPrice);
     document.getElementById('product_unit_id').addEventListener('change', autoCalcPrice);
+    ppnCheckbox.addEventListener('change', function() {
+        updatePPNState();
+        autoCalcPrice();
+    });
 
     // Handle product select change
     productSelect.addEventListener('change', function() {
@@ -229,7 +286,12 @@ $(document).ready(function() {
         const unitName = unitSelect.options[unitSelect.selectedIndex]?.textContent || '';
         const qty = parseInt(document.getElementById('qty_input').value);
         const ppn = parseFloat(document.getElementById('ppn_input').value) || 0;
-        const buyPrice = parseFloat(document.getElementById('buy_price_input').value);
+        let buyPrice = 0;
+        if (ppnCheckbox.checked) {
+            buyPrice = parseFloat(buyPriceInputPPN.value) || 0;
+        } else {
+            buyPrice = parseFloat(buyPriceInput.value) || 0;
+        }
         const price = parseFloat(document.getElementById('price_input').value);
         const conversion = getSelectedUnitConversion();
         if (!productId || !unitId || !qty || !buyPrice || !price) {
@@ -259,7 +321,11 @@ $(document).ready(function() {
         document.getElementById('qty_input').value = '';
         document.getElementById('ppn_input').value = '';
         document.getElementById('buy_price_input').value = '';
+        document.getElementById('buy_price_input_ppn').value = '';
         document.getElementById('price_input').value = '';
+        buyPriceInputPPNGroup.style.display = 'none';
+        buyPriceInputPPN.disabled = true;
+        ppnCheckbox.checked = false;
     });
 
     // Form submit handler

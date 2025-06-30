@@ -25,10 +25,10 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Produk</label>
-                        <select name="product_id" class="form-select @error('product_id') is-invalid @enderror" required>
+                        <select name="product_id" id="product_select" class="form-select @error('product_id') is-invalid @enderror" required>
                             <option value="">Pilih Produk...</option>
                             @foreach($products as $product)
-                                <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                                <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->sku }} - {{ $product->name }}</option>
                             @endforeach
                         </select>
                         @error('product_id')
@@ -90,4 +90,3 @@
     </div>
 </div>
 @endsection
-

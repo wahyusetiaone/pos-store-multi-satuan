@@ -34,4 +34,6 @@
     <link rel="stylesheet"  href="{{ asset('assets/css/lib/audioplayer.css') }}">
     <!-- main css -->
     <link rel="stylesheet"  href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
 </head>

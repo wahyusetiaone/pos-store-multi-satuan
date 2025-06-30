@@ -27,4 +27,17 @@
     <!-- main js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new Choices('#product_select', {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: 'Pilih Produk...'
+            });
+        });
+    </script>
+
     <?php echo (isset($script) ? $script   : '')?>

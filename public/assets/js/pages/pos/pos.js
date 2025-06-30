@@ -514,3 +514,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+function formatRupiah(angka) {
+    return 'Rp ' + angka.toLocaleString('id-ID') + ',-';
+}
+function updateChange() {
+    let grandTotal = 0;
+    let payment = 0;
+    // Ambil angka dari grand total (hilangkan format)
+    const grandTotalText = document.getElementById('grandTotal').innerText.replace(/[^\d]/g, '');
+    if (grandTotalText) grandTotal = parseInt(grandTotalText);
+    const paymentInput = document.getElementById('paymentAmount');
+    if (paymentInput && paymentInput.value) payment = parseInt(paymentInput.value);
+    let change = payment - grandTotal;
+    if (isNaN(change) || change < 0) change = 0;
+    document.getElementById('changeAmount').innerText = formatRupiah(change);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentInput = document.getElementById('paymentAmount');
+    if (paymentInput) {
+        paymentInput.addEventListener('input', updateChange);
+    }
+    // Jika grand total bisa berubah dinamis, tambahkan event listener juga
+    const observer = new MutationObserver(updateChange);
+    const grandTotalElem = document.getElementById('grandTotal');
+    if (grandTotalElem) {
+        observer.observe(grandTotalElem, { childList: true, characterData: true, subtree: true });
+    }
+});

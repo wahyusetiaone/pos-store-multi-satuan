@@ -191,13 +191,13 @@
                         <input type="number" id="qty_input" class="form-control" placeholder="Jumlah" min="1" disabled>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">PPN (%)</label>
-                        <input type="number" id="ppn_input" class="form-control" placeholder="PPN %" min="0" max="100" disabled>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label">Harga Beli</label>
-                        <small class="form-text text-muted"> sudah termasuk PPN</small>
                         <input type="number" id="buy_price_input" class="form-control" placeholder="Harga Beli" min="0" disabled>
+                    </div>
+                    <div class="mb-3" id="buy_price_input_ppn_group" style="display:none;">
+                        <label class="form-label">Harga Beli</label>
+                        <small class="form-text text-muted"> (Termasuk PPN)</small>
+                        <input type="number" id="buy_price_input_ppn" class="form-control" placeholder="Harga Beli Termasuk PPN" min="0" disabled readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Harga Jual</label>
@@ -205,6 +205,15 @@
                         <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0" disabled readonly>
                     </div>
 
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" id="ppn_checkbox">
+                            <label class="form-check-label" for="ppn_checkbox">
+                                Gunakan PPN 11%
+                            </label>
+                        </div>
+                        <input type="hidden" id="ppn_input" value="0">
+                    </div>
                     <div class="mb-4">
                         <button type="button" class="btn btn-primary w-100" id="add_item" disabled data-bs-dismiss="modal">Tambah</button>
                     </div>
@@ -285,3 +294,17 @@
         :selectMode="true"
     />
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ppnCheckbox = document.getElementById('ppn_checkbox');
+        const ppnInput = document.getElementById('ppn_input');
+        if (ppnCheckbox && ppnInput) {
+            ppnCheckbox.addEventListener('change', function() {
+                ppnInput.value = this.checked ? 11 : 0;
+            });
+        }
+    });
+</script>
+@endpush
