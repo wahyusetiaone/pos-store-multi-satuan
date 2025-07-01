@@ -18,6 +18,13 @@ class SaleItem extends Model
         'unit_profit_loss'
     ];
 
+    protected $casts = [
+        'price' => 'integer',
+        'discount' => 'integer',
+        'subtotal' => 'integer',
+        'unit_profit_loss' => 'integer'
+    ];
+
     protected static function boot()
     {
         parent::boot();

@@ -43,7 +43,13 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label class="form-label">Supplier</label>
-                                    <input type="text" name="supplier" class="form-control" value="{{ $purchase->supplier }}" required>
+                                    <select name="supplier_id" class="form-select @error('supplier_id') is-invalid @enderror" required>
+                                        <option value="">Pilih Supplier...</option>
+                                        @foreach(App\Models\Supplier::where('store_id', $purchase->store_id)->get() as $supplier)
+                                            <option value="{{ $supplier->id }}" {{ $purchase->supplier_id == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('supplier_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -275,4 +281,3 @@
         </div>
     </div>
 @endsection
-

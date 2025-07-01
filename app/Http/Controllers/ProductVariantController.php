@@ -45,7 +45,7 @@ class ProductVariantController extends Controller
     public function edit(ProductVariant $productVariant)
     {
         $products = Product::all();
-        $productUnits = ProductUnit::with('product', 'unit')->get();
+        $productUnits = ProductUnit::with(['product', 'unit'])->where('product_id', $productVariant->product_id)->get();
         return view('product_variants.edit', compact('productVariant', 'products', 'productUnits'));
     }
 

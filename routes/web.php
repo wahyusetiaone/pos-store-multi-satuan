@@ -19,6 +19,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -148,6 +149,9 @@ Route::middleware(['auth', 'store.access'])->group(function () {
     // Search routes
     Route::get('/search/customer-search', [CustomerController::class, 'search'])->name('customers.search');
 
+    // Debt (Hutang) routes
+    Route::get('/debts', [\App\Http\Controllers\DebtController::class, 'index'])->name('debts.index');
+
     // API route untuk categories by store
     Route::get('/api/categories', function (Request $request) {
         $categories = App\Models\Category::where('store_id', $request->store_id)->get();
@@ -171,6 +175,10 @@ Route::middleware(['auth', 'store.access'])->group(function () {
     Route::resource('units', UnitController::class);
     Route::get('product-units', [\App\Http\Controllers\UnitController::class, 'productUnits']);
     Route::resource('product-variants', App\Http\Controllers\ProductVariantController::class);
+    Route::resource('suppliers', SupplierController::class);
+
+    // API route for suppliers by store
+    Route::get('/api/suppliers', [SupplierController::class, 'apiByStore'])->name('api.suppliers');
 });
 
 // Store Selection Routes

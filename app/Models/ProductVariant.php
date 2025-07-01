@@ -15,6 +15,10 @@ class ProductVariant extends Model
         'status',
     ];
 
+    protected $casts = [
+        'price' => 'integer'
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);

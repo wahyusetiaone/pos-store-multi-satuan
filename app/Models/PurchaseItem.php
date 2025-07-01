@@ -18,9 +18,9 @@ class PurchaseItem extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'buy_price' => 'decimal:2',
-        'subtotal' => 'decimal:2'
+        'price' => 'integer',
+        'buy_price' => 'integer',
+        'subtotal' => 'integer'
     ];
 
     public function purchase()

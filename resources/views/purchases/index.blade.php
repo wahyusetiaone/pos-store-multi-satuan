@@ -40,7 +40,7 @@
                                         <td>{{ $purchase->store->name ?? '-' }}</td>
                                     @endif
                                     <td>{{ $purchase->purchase_date }}</td>
-                                    <td>{{ $purchase->supplier }}</td>
+                                    <td>{{ $purchase->supplier ? ($purchase->supplier->name ?? '-') : '-' }}</td>
                                     <td>Rp {{ number_format($purchase->total, 0, ',', '.') }}</td>
                                     <td>
                                         @if($purchase->status == 'drafted')

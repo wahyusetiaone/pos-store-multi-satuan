@@ -24,17 +24,15 @@
                 <form action="{{ route('product-variants.update', $productVariant->id) }}" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="product_id" value="{{ $productVariant->product_id }}">
                     <div class="mb-3">
                         <label class="form-label">Produk</label>
-                        <select name="product_id" class="form-select @error('product_id') is-invalid @enderror" required>
+                        <select class="form-select" disabled>
                             <option value="">Pilih Produk...</option>
                             @foreach($products as $product)
                                 <option value="{{ $product->id }}" {{ old('product_id', $productVariant->product_id) == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
                             @endforeach
                         </select>
-                        @error('product_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Satuan Produk</label>

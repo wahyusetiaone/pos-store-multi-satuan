@@ -62,6 +62,12 @@
                     <span>Pelanggan</span>
                 </a>
             </li>
+                <li>
+                    <a href="{{ route('debts.index') }}">
+                        <iconify-icon icon="mdi:account-cash-outline" class="menu-icon"></iconify-icon>
+                        <span>Hutang</span>
+                    </a>
+                </li>
             @endif
 
             @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin')
@@ -136,6 +142,14 @@
                     <span>Voucher</span>
                 </a>
             </li>
+            @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'purchasing')
+            <li>
+                <a href="{{ route('suppliers.index') }}">
+                    <iconify-icon icon="mdi:truck-outline" class="menu-icon"></iconify-icon>
+                    <span>Supplier</span>
+                </a>
+            </li>
+            @endif
         </ul>
     </div>
 </aside>

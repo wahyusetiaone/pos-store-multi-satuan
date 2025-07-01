@@ -53,6 +53,7 @@
                             <div class="card h-100 product-card cursor-pointer"
                                 data-variant-id="{{ $variant->id }}"
                                 data-product-id="{{ $variant->product->id ?? '' }}"
+                                data-product-sku="{{ $variant->product->sku ?? '' }}"
                                 data-category-id="{{ $variant->product->category_id ?? '' }}">
                                 <img src="{{ $variant->product->images->first() ? asset('storage/' . $variant->product->images->first()->image_path) : asset('assets/images/no-image.png') }}"
                                      class="card-img-top" alt="{{ $variant->product->name ?? '-' }}" style="height: 200px; object-fit: cover;">
@@ -146,6 +147,10 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </div>
+                            </div>
+                            <div class="justify-content-between mb-2" id="voucherAmountRow" style="display:none">
+                                <span>Potongan Voucher:</span>
+                                <span class="fw-bold text-end text-success" id="voucherAmount">Rp 0,-</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Diskon (%):</span>

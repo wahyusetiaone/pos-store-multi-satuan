@@ -97,6 +97,18 @@ const cart = {
         return this.calculateSubtotal() + this.calculateTax() - this.calculateDiscount() - this.voucherDiscount;
     },
 
+    setPaymentFieldsDisabled(isDisabled) {
+        document.querySelector('input[name="voucher_code"]').disabled = isDisabled;
+        document.getElementById('applyVoucher').disabled = isDisabled;
+        document.querySelector('input[name="discount_percentage"]').disabled = isDisabled;
+        document.querySelector('input[name="tax_percentage"]').disabled = isDisabled;
+        document.querySelector('input[name="fixed_discount"]').disabled = isDisabled;
+        document.querySelector('input[name="payment_amount"]').disabled = isDisabled;
+        document.querySelector('select[name="payment_method"]').disabled = isDisabled;
+        document.querySelector('select[name="order_type"]').disabled = isDisabled;
+        document.querySelector('select[name="order_type"]').disabled = isDisabled;
+    },
+
     updateCart() {
         // Update items table
         const itemsContainer = document.getElementById('cartItems');
@@ -164,6 +176,10 @@ const cart = {
         // Update totals
         document.getElementById('totalAmount').textContent = `Rp ${this.calculateSubtotal().toLocaleString()},-`;
         document.getElementById('grandTotal').textContent = `Rp ${this.calculateGrandTotal().toLocaleString()},-`;
+
+        // Disable/enable payment fields if cart is empty
+        const isCartEmpty = this.items.length === 0;
+        this.setPaymentFieldsDisabled(isCartEmpty);
     },
 
     clear() {
@@ -215,9 +231,11 @@ function filterProducts() {
     document.querySelectorAll('.product-card').forEach(card => {
         const productName = card.querySelector('.card-title').textContent.toLowerCase();
         const productCategoryId = card.getAttribute('data-category-id');
+        // Ambil SKU dari data attribute jika ada
+        const productSku = card.getAttribute('data-product-sku') ? card.getAttribute('data-product-sku').toLowerCase() : '';
 
         const matchesCategory = !categoryId || productCategoryId === categoryId;
-        const matchesSearch = !searchText || productName.includes(searchText);
+        const matchesSearch = !searchText || productName.includes(searchText) || productSku.includes(searchText);
 
         card.closest('.col-md-3').style.display = (matchesCategory && matchesSearch) ? '' : 'none';
     });
@@ -225,6 +243,9 @@ function filterProducts() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Set payment fields disabled on page load
+    cart.setPaymentFieldsDisabled(true);
     // Payment method change handler
     document.querySelector('select[name="payment_method"]').addEventListener('change', function() {
         cart.paymentMethod = this.value;
@@ -281,12 +302,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 cart.voucherCode = voucherCode;
                 cart.voucherDiscount = data.discount_amount || 0;
                 cart.updateCart();
+                showVoucherAmount(cart.voucherDiscount);
                 showToast('Voucher berhasil diterapkan!', 'success');
             } else {
-                console.log(response)
                 cart.voucherCode = null;
                 cart.voucherDiscount = 0;
                 cart.updateCart();
+                showVoucherAmount(0);
                 showToast(data.message || 'Voucher tidak valid!', 'danger');
             }
         } catch (error) {
@@ -519,27 +541,45 @@ document.addEventListener('DOMContentLoaded', function() {
 function formatRupiah(angka) {
     return 'Rp ' + angka.toLocaleString('id-ID') + ',-';
 }
-function updateChange() {
+function updateChangeAndLabel() {
     let grandTotal = 0;
     let payment = 0;
-    // Ambil angka dari grand total (hilangkan format)
     const grandTotalText = document.getElementById('grandTotal').innerText.replace(/[^\d]/g, '');
     if (grandTotalText) grandTotal = parseInt(grandTotalText);
     const paymentInput = document.getElementById('paymentAmount');
     if (paymentInput && paymentInput.value) payment = parseInt(paymentInput.value);
     let change = payment - grandTotal;
-    if (isNaN(change) || change < 0) change = 0;
-    document.getElementById('changeAmount').innerText = formatRupiah(change);
+    const changeLabel = document.querySelector('#changeAmount').parentElement.querySelector('span');
+    if (isNaN(change)) change = 0;
+    if (change < 0) {
+        changeLabel.textContent = 'Kekurangan:';
+        document.getElementById('changeAmount').innerText = formatRupiah(Math.abs(change));
+    } else {
+        changeLabel.textContent = 'Kembalian:';
+        document.getElementById('changeAmount').innerText = formatRupiah(change);
+    }
 }
 document.addEventListener('DOMContentLoaded', function() {
     const paymentInput = document.getElementById('paymentAmount');
     if (paymentInput) {
-        paymentInput.addEventListener('input', updateChange);
+        paymentInput.addEventListener('input', updateChangeAndLabel);
     }
-    // Jika grand total bisa berubah dinamis, tambahkan event listener juga
-    const observer = new MutationObserver(updateChange);
+    const observer = new MutationObserver(updateChangeAndLabel);
     const grandTotalElem = document.getElementById('grandTotal');
     if (grandTotalElem) {
         observer.observe(grandTotalElem, { childList: true, characterData: true, subtree: true });
     }
 });
+function showVoucherAmount(amount) {
+    const voucherRow = document.getElementById('voucherAmountRow');
+    const voucherAmount = document.getElementById('voucherAmount');
+    if (amount && amount > 0) {
+        voucherAmount.textContent = formatRupiah(amount);
+        voucherRow.classList.add('d-flex');
+        voucherRow.style.display = '';
+    } else {
+        voucherRow.style.display = 'none';
+        voucherAmount.textContent = 'Rp 0,-';
+        voucherRow.classList.remove('d-flex');
+    }
+}

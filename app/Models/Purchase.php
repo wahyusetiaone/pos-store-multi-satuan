@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Purchase extends Model
 {
     protected $fillable = [
-        'store_id', // dari migration alter table
+        'store_id',
         'user_id',
         'purchase_date',
-        'supplier',
+        'supplier_id',
         'total',
         'status',
         'ship_date',
@@ -35,5 +35,10 @@ class Purchase extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

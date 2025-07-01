@@ -61,7 +61,7 @@ class PurchaseController extends Controller
 
             $validated = $request->validate([
                 'purchase_date' => 'required|date',
-                'supplier' => 'required|string|max:255',
+                'supplier_id' => 'required|exists:suppliers,id',
                 'total' => 'required|numeric',
                 'note' => 'nullable|string',
                 'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited',
@@ -86,7 +86,7 @@ class PurchaseController extends Controller
                 'store_id' => $storeId,
                 'user_id' => auth()->id(),
                 'purchase_date' => $request->purchase_date,
-                'supplier' => $request->supplier,
+                'supplier_id' => $request->supplier_id,
                 'total' => $request->total,
                 'status' => 'drafted',
                 'note' => $request->note
@@ -153,7 +153,7 @@ class PurchaseController extends Controller
         $validated = $request->validate([
             'user_id' => 'exists:users,id',
             'purchase_date' => 'date',
-            'supplier' => 'string|max:255',
+            'supplier_id' => 'required|exists:suppliers,id',
             'status' => 'string|max:255',
             'shipping_date' => 'date|nullable',
             'total' => 'numeric',
@@ -169,7 +169,7 @@ class PurchaseController extends Controller
         $purchase->update([
             'user_id' => $request->user_id,
             'purchase_date' => $request->purchase_date,
-            'supplier' => $request->supplier,
+            'supplier_id' => $request->supplier_id,
             'status' => $request->status,
             'total' => $request->total,
             'note' => $request->note,

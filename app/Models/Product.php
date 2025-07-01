@@ -21,6 +21,11 @@ class Product extends Model
         'status'
     ];
 
+    protected $casts = [
+        'price' => 'integer',
+        'buy_price' => 'integer',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);

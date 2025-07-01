@@ -2,6 +2,9 @@
 @php
     $title = 'Tambah Variant Produk';
     $subTitle = 'Form Tambah Variant Produk';
+    $script = '
+            <script src="' . asset('assets/js/pages/product_variant/create.js') . '"></script>
+            ';
 @endphp
 
 @section('content')

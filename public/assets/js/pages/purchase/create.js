@@ -361,6 +361,46 @@ $(document).ready(function() {
         });
     });
 
+    // Disable all form fields except store select until store is selected
+    function setPurchaseFormState(enabled) {
+        const form = document.getElementById('purchaseForm');
+        if (!form) return;
+        // All inputs except store_id
+        $(form).find('input, select, textarea, button').not('#store_id, [name="_token"]').prop('disabled', !enabled);
+        // Always enable store select and CSRF
+        $('#store_id').prop('disabled', false);
+        $(form).find('[name="_token"]').prop('disabled', false);
+    }
+
+    // On page load, check if store is selected
+    if (storeSelect) {
+        if (!storeSelect.value) {
+            setPurchaseFormState(false);
+        }
+        storeSelect.addEventListener('change', function() {
+            if (this.value) {
+                setPurchaseFormState(true);
+                // Fetch suppliers for this store
+                fetch(`/api/suppliers?store_id=${this.value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const supplierSelect = document.querySelector('select[name="supplier_id"]');
+                        if (supplierSelect) {
+                            supplierSelect.innerHTML = '<option value="">Pilih Supplier...</option>';
+                            data.forEach(supplier => {
+                                supplierSelect.innerHTML += `<option value="${supplier.id}">${supplier.name}</option>`;
+                            });
+                        }
+                    });
+            } else {
+                setPurchaseFormState(false);
+                // Kosongkan supplier select
+                const supplierSelect = document.querySelector('select[name="supplier_id"]');
+                if (supplierSelect) supplierSelect.innerHTML = '<option value="">Pilih Supplier...</option>';
+            }
+        });
+    }
+
     // Handle pre-selected store and product
     const urlParams = new URLSearchParams(window.location.search);
     const preSelectedStoreId = urlParams.get('store_id');
