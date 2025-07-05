@@ -131,7 +131,9 @@ class ShippingController extends Controller
         if (auth()->user()->hasGlobalAccess()) {
             $stores = Store::where('is_active', true)->get();
         }
-        return view('shippings.edit', compact('shipping', 'stores'));
+        // Ambil suppliers berdasarkan store_id dari shipping
+        $suppliers = \App\Models\Supplier::where('store_id', $shipping->store_id)->get();
+        return view('shippings.edit', compact('shipping', 'stores', 'suppliers'));
     }
 
     public function update(Request $request, Shipping $shipping)

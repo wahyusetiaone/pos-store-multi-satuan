@@ -47,7 +47,15 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Supplier</label>
-                                    <input type="text" name="supplier" class="form-control" value="{{ $shipping->supplier }}" required>
+                                    <select name="supplier_display" class="form-select" disabled>
+                                        <option value="">Pilih Supplier...</option>
+                                        @foreach($suppliers as $supplier)
+                                            <option value="{{ $supplier->name }}" {{ $shipping->supplier == $supplier->name ? 'selected' : '' }}>
+                                                {{ $supplier->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input type="hidden" name="supplier" value="{{ $shipping->supplier }}">
                                 </div>
                             </div>
                             <div class="col-md-3">

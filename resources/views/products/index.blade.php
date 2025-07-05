@@ -110,6 +110,7 @@
                                         @endif
                                     </span>
                                 </th>
+                                <th>Satuan</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -134,6 +135,7 @@
                                 </td>
                                 <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                                 <td>{{ $product->stock }}</td>
+                                <td>{{ $product->defaultUnit->name ?? '-' }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('products.show', $product->id) }}" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center me-1" title="Lihat">
                                         <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
@@ -228,4 +230,3 @@
 @endif
 
 @endsection
-

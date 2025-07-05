@@ -58,4 +58,9 @@ class Product extends Model
             ->using(ProductUnit::class)
             ->withTimestamps();
     }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
 }

@@ -21,12 +21,28 @@ class ProductVariant extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function productUnit()
     {
         return $this->belongsTo(ProductUnit::class);
     }
-}
 
+    public function getStockAttribute()
+    {
+        $product = $this->product;
+        $productUnit = $this->productUnit;
+        if (!$product || !$productUnit) {
+            return 0;
+        }
+        // Ambil conversion factor dari tabel product_unit
+        $pivot = ProductUnit::find($this->product_unit_id);
+        $conversion = $pivot ? $pivot->conversion_factor : 1;
+        if ($conversion <= 0 || $this->qty <= 0) {
+            return 0;
+        }
+        // Rumus: (stock / conversion_factor) / qty, dibulatkan ke bawah
+        return (int) floor(($product->stock / $conversion) / $this->qty);
+    }
+}

@@ -60,7 +60,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title m-0 p-0">{{ $variant->product->name ?? '-' }} <span class="badge bg-secondary">{{ $variant->name }}</span></h6>
                                     <p class="card-text text-primary m-0 p-0">Rp {{ number_format($variant->price, 0, ',', '.') }},-</p>
-                                    <p class="card-text small m-0 p-0">STOK: {{ $variant->qty }}x</p>
+                                    <p class="card-text small m-0 p-0">STOK: {{ $variant->stock }}x</p>
                                     @if($variant->productUnit && $variant->productUnit->unit)
                                         <p class="card-text small m-0 p-0">Satuan: {{ $variant->productUnit->unit->name }}</p>
                                     @endif
