@@ -54,6 +54,20 @@
                     </a>
                 </li>
             @endif
+            @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'purchasing')
+                <li>
+                    <a href="{{ route('vouchers.index') }}">
+                        <iconify-icon icon="mdi:ticket-percent-outline" class="menu-icon"></iconify-icon>
+                        <span>Voucher</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('suppliers.index') }}">
+                        <iconify-icon icon="mdi:truck-outline" class="menu-icon"></iconify-icon>
+                        <span>Supplier</span>
+                    </a>
+                </li>
+            @endif
 
             @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'cashier')
             <li>
@@ -133,20 +147,6 @@
                 <a href="{{ route('users.index') }}">
                     <iconify-icon icon="mdi:account-key-outline" class="menu-icon"></iconify-icon>
                     <span>Pengguna</span>
-                </a>
-            </li>
-            @endif
-            <li>
-                <a href="{{ route('vouchers.index') }}">
-                    <iconify-icon icon="mdi:ticket-percent-outline" class="menu-icon"></iconify-icon>
-                    <span>Voucher</span>
-                </a>
-            </li>
-            @if(auth()->user()->role === 'owner' || auth()->user()->role === 'store_admin' || auth()->user()->role === 'purchasing')
-            <li>
-                <a href="{{ route('suppliers.index') }}">
-                    <iconify-icon icon="mdi:truck-outline" class="menu-icon"></iconify-icon>
-                    <span>Supplier</span>
                 </a>
             </li>
             @endif
