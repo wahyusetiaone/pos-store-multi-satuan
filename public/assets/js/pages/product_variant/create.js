@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 units.forEach(unit => {
                     const opt = document.createElement('option');
                     opt.value = unit.id;
-                    opt.textContent = unit.unit_name + (unit.conversion_factor ? ` (Konversi: ${unit.conversion_factor})` : '');
+                    opt.textContent = unit.unit_name + (unit.conversion_factor ? ` (Konversi: ${unit.conversion_factor_cash})` : '');
                     opt.dataset.conversion = unit.conversion_factor;
                     unitSelect.appendChild(opt);
                 });

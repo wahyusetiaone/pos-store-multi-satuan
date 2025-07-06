@@ -59,11 +59,12 @@ class PurchaseController extends Controller
         try {
             DB::beginTransaction();
 
-            $validated = $request->validate([
+            $request->validate([
                 'purchase_date' => 'required|date',
                 'supplier_id' => 'required|exists:suppliers,id',
                 'total' => 'required|numeric',
                 'note' => 'nullable|string',
+                'status' => 'nullable|string',
                 'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'prohibited',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
@@ -88,7 +89,7 @@ class PurchaseController extends Controller
                 'purchase_date' => $request->purchase_date,
                 'supplier_id' => $request->supplier_id,
                 'total' => $request->total,
-                'status' => 'drafted',
+                'status' =>  $request->status,
                 'note' => $request->note
             ]);
 
@@ -104,6 +105,21 @@ class PurchaseController extends Controller
                     'subtotal' => $item['quantity'] * $item['buy_price'],
                     'ppn' => $item['ppn'] ?? 0,
                 ]);
+            }
+
+            // Jika status completed, update stock & buy_price produk
+            if ($request->status === 'completed') {
+                $purchase->load('items.productUnit', 'items.product');
+                foreach ($purchase->items as $item) {
+                    $conversion = $item->productUnit ? $item->productUnit->conversion_factor : 1;
+                    $qtyToAdd = $item->quantity * $conversion;
+                    if ($item->product) {
+                        $item->product->update([
+                            'buy_price' => $item->buy_price,
+                            'stock' => $item->product->stock + $qtyToAdd
+                        ]);
+                    }
+                }
             }
 
             DB::commit();

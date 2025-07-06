@@ -50,7 +50,7 @@
                                     <select name="supplier_display" class="form-select" disabled>
                                         <option value="">Pilih Supplier...</option>
                                         @foreach($suppliers as $supplier)
-                                            <option value="{{ $supplier->name }}" {{ $shipping->supplier == $supplier->name ? 'selected' : '' }}>
+                                            <option value="{{ $supplier->name }}" {{ $shipping->supplier_id == $supplier->id ? 'selected' : '' }}>
                                                 {{ $supplier->name }}
                                             </option>
                                         @endforeach

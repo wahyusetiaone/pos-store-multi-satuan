@@ -43,6 +43,8 @@ function openShippingModal(purchaseId) {
                 return;
             }
 
+            document.getElementById('supplier_id').value = data.supplier_id;
+
             const tbody = document.getElementById('purchaseItems');
             tbody.innerHTML = data.items.map((item, index) => `
                 <tr>
@@ -60,10 +62,14 @@ function openShippingModal(purchaseId) {
                     <td class="text-center">${item.quantity}</td>
                     <td>
                         <input type="number" class="form-control shipping-qty" name="items[${index}][quantity]"
-                               min="1" max="${item.quantity}" value="${item.quantity}">
+                               min="1" max="${item.quantity}" value="${item.quantity}" data-index="${index}">
                     </td>
+                    <td class="item-price-display text-end" id="item-price-display-${index}">Rp 0</td>
                 </tr>
             `).join('');
+
+            // Update price display for all items
+            updateAllPriceDisplays();
 
             // Add check all functionality
             document.getElementById('checkAll').addEventListener('change', function() {
@@ -71,6 +77,22 @@ function openShippingModal(purchaseId) {
                     checkbox.checked = this.checked;
                 });
                 calculateTotal();
+                updateAllPriceDisplays();
+            });
+
+            // Add event listeners for qty change to update price display
+            tbody.querySelectorAll('.shipping-qty').forEach(input => {
+                input.addEventListener('input', function() {
+                    updatePriceDisplay(this.dataset.index);
+                    calculateTotal();
+                });
+            });
+            // Add event listeners for checkbox change to update price display
+            tbody.querySelectorAll('.item-checkbox').forEach((checkbox, idx) => {
+                checkbox.addEventListener('change', function() {
+                    updatePriceDisplay(idx);
+                    calculateTotal();
+                });
             });
         })
         .catch(error => {
@@ -84,6 +106,21 @@ function openShippingModal(purchaseId) {
 // Function to submit shipping
 function submitShipping() {
     const form = document.getElementById('shippingForm');
+    // Update all buy_price dan price input sesuai qty terbaru sebelum submit
+    document.querySelectorAll('.shipping-qty').forEach((input, idx) => {
+        const qty = parseFloat(input.value) || 0;
+        const qtyPembelian = parseFloat(document.querySelectorAll('input[name^="items["][name$="[quantity]"]')[idx].value) || 1;
+        const buyPriceInput = document.querySelectorAll('input[name^="items["][name$="[buy_price]"]')[idx];
+        const originalBuyPrice = parseFloat(buyPriceInput.value) || 0;
+        // Hitung buy_price baru sesuai qty kirim
+        const newBuyPrice = qty > 0 ? (originalBuyPrice / qtyPembelian) * qty : 0;
+        buyPriceInput.value = newBuyPrice;
+        // Update input price juga (jika ingin price sama dengan buy_price per qty)
+        const priceInput = document.querySelectorAll('input[name^="items["][name$="[price]"]')[idx];
+        if (priceInput) {
+            priceInput.value = newBuyPrice;
+        }
+    });
     const formData = new FormData(form);
     const purchaseId = document.getElementById('purchase_id').value;
 
@@ -158,14 +195,33 @@ function calculateTotal() {
     let total = 0;
     document.querySelectorAll('.item-checkbox').forEach((checkbox, index) => {
         if (checkbox.checked) {
+            console.log('Checkbox checked at index:', index);
             const qty = document.querySelectorAll('.shipping-qty')[index].value;
             const qty_u = document.querySelectorAll('input[name^="items["][name$="[quantity]"]')[index].value;
             const price = document.querySelectorAll('input[name^="items["][name$="[buy_price]"]')[index].value;
             total += (price/qty_u) * qty;
         }
     });
-    document.getElementById('total_amount').value = total.toFixed(2);
+    document.getElementById('total_amount').value = total;
     return total;
+}
+
+// --- Tambahkan fungsi berikut di bawah ---
+function updatePriceDisplay(index) {
+    const qtyInput = document.querySelectorAll('.shipping-qty')[index];
+    const qty = parseFloat(qtyInput.value) || 0;
+    const priceInput = document.querySelectorAll('input[name^="items["][name$="[buy_price]"]')[index];
+    const qtyPembelian = parseFloat(document.querySelectorAll('input[name^="items["][name$="[quantity]"]')[index].value) || 1;
+    const price = parseFloat(priceInput.value) || 0;
+    // Hitung harga satuan * qty kirim
+    const priceDisplay = qty > 0 ? (price / qtyPembelian) * qty : 0;
+    document.getElementById(`item-price-display-${index}`).textContent = 'Rp ' + priceDisplay.toLocaleString('id-ID');
+}
+
+function updateAllPriceDisplays() {
+    document.querySelectorAll('.shipping-qty').forEach((input, idx) => {
+        updatePriceDisplay(idx);
+    });
 }
 
 // Add event listeners when document is ready
@@ -176,4 +232,5 @@ document.addEventListener('DOMContentLoaded', function() {
             calculateTotal();
         }
     });
+    updateAllPriceDisplays();
 });

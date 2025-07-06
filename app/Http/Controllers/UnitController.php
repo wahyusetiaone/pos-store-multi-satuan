@@ -94,7 +94,8 @@ class UnitController extends Controller
                     'id' => $pu->id,
                     'unit_id' => $pu->unit_id,
                     'unit_name' => $pu->unit ? $pu->unit->name : '',
-                    'conversion_factor' => $pu->conversion_factor
+                    'conversion_factor' => $pu->conversion_factor,
+                    'conversion_factor_cash' => $pu->conversion_factor_cash
                 ];
             });
         return response()->json($units);

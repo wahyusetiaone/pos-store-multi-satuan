@@ -117,6 +117,7 @@
             <div class="modal-body">
                 <form id="shippingForm">
                     <input type="hidden" id="purchase_id" name="purchase_id">
+                    <input type="hidden" id="supplier_id" name="supplier_id">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Nomor Pengiriman</label>
@@ -154,26 +155,33 @@
                         <textarea name="note" class="form-control" rows="2"></textarea>
                     </div>
 
+{{--                    list item--}}
                     <div class="table-responsive mb-3">
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px; min-width: 50px;"> <!-- Tambahkan min-width -->
-                                        <div class="form-check"> <!-- Bungkus checkbox dalam form-check -->
+                                    <th style="width: 50px; min-width: 50px;">
+                                        <div class="form-check">
                                             <input type="checkbox" class="form-check-input" id="checkAll">
                                         </div>
                                     </th>
                                     <th>Produk</th>
                                     <th style="width: 120px">Qty Pembelian</th>
                                     <th style="width: 120px">Qty Kirim</th>
+                                    <th style="width: 240px">Harga</th> <!-- Kolom harga display -->
                                 </tr>
                             </thead>
                             <tbody id="purchaseItems">
+                                {{--
+                                    Pastikan script JS mengisi kolom harga display ini,
+                                    misal: <td class="item-price-display">Rp 0</td>
+                                    dan update saat qty kirim berubah.
+                                --}}
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="2" class="text-end fw-bold">Total:</td>
-                                    <td colspan="2">
+                                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                                    <td colspan="1">
                                         <input type="number" name="total" id="total_amount" class="form-control" readonly>
                                     </td>
                                 </tr>

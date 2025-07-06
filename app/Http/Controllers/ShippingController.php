@@ -44,6 +44,7 @@ class ShippingController extends Controller
 
     public function store(Request $request)
     {
+
         try {
             DB::beginTransaction();
 
@@ -54,6 +55,7 @@ class ShippingController extends Controller
                 'shipping_date' => 'required|date',
                 'status' => 'required|in:drafted,shipped,completed',
                 'store_id' => auth()->user()->hasGlobalAccess() ? 'required|exists:stores,id' : 'nullable',
+                'supplier_id' => 'required|exists:suppliers,id', // ganti supplier ke supplier_id
                 'total' => 'required|numeric|min:0',
                 'note' => 'nullable|string',
                 'items' => 'required|array|min:1',
@@ -61,8 +63,7 @@ class ShippingController extends Controller
                 'items.*.product_unit_id' => 'required|exists:product_unit,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.price' => 'required|numeric|min:0',
-                'items.*.buy_price' => 'required|numeric|min:0',  // Tambahkan validasi buy_price
-                'items.*.ppn' => 'nullable|numeric',
+                'items.*.buy_price' => 'required|numeric|min:0',
             ]);
 
             // Get purchase data
@@ -74,7 +75,7 @@ class ShippingController extends Controller
             $shipping->user_id = auth()->id();
             $shipping->number_shipping = $validated['number_shipping'];
             $shipping->shipping_date = $validated['shipping_date'];
-            $shipping->supplier = $purchase->supplier;
+            $shipping->supplier_id = $validated['supplier_id']; // ganti supplier ke supplier_id
             $shipping->status = $validated['status'];
             $shipping->total = $validated['total'];
             $shipping->note = $validated['note'] ?? null;
@@ -233,17 +234,6 @@ class ShippingController extends Controller
                         'qty_received' => $itemData['qty_received'],
                         'note' => $itemData['note'] ?? null
                     ]);
-
-                    // Update product stock
-                    $product = Product::where('id', $itemData['product_id'])
-                        ->where('store_id', $shipping->store_id)
-                        ->first();
-
-                    if ($product) {
-                        $product->update([
-                            'stock' => $product->stock + $itemData['qty_received']
-                        ]);
-                    }
                 }
             }
 

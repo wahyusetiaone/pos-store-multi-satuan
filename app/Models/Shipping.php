@@ -11,7 +11,7 @@ class Shipping extends Model
         'user_id',
         'number_shipping',
         'shipping_date',
-        'supplier',
+        'supplier_id', // ubah dari supplier ke supplier_id
         'total',
         'status',
         'ship_date',
@@ -37,6 +37,9 @@ class Shipping extends Model
     {
         return $this->belongsTo(Store::class);
     }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 }
-
-
