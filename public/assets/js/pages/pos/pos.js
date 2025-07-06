@@ -243,7 +243,6 @@ function filterProducts() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-
     // Set payment fields disabled on page load
     cart.setPaymentFieldsDisabled(true);
     // Payment method change handler
@@ -319,6 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save transaction button handler
     document.getElementById('saveTransaction').addEventListener('click', async function() {
+        const isHasStoreID = document.querySelector('select[name="store_id"]');
+
         if (cart.items.length === 0) {
             showToast('Keranjang kosong!', 'danger');
             return;
@@ -333,29 +334,39 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Cek jika ada select store_id tapi belum dipilih
+        if (isHasStoreID && (isHasStoreID.value === '' || isHasStoreID.value === null)) {
+            showToast('Pilih toko terlebih dahulu!', 'danger');
+            return;
+        }
+
         try {
+            const bodyData = {
+                items: cart.items,
+                customer_id: cart.customerId,
+                customer_name: cart.customerName,
+                customer_phone: cart.customerPhone,
+                payment_method: cart.paymentMethod,
+                order_type: cart.orderType,
+                total: cart.calculateSubtotal(),
+                grand_total: grandTotal,
+                paid: paymentAmount,
+                discount: cart.discount,
+                tax: cart.tax,
+                fixed_discount: cart.fixedDiscount,
+                voucher_code: cart.voucherCode,
+                voucher_discount: cart.voucherDiscount
+            };
+            if (isHasStoreID && isHasStoreID.value) {
+                bodyData.store_id = isHasStoreID.value;
+            }
             const response = await fetch('/sales', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({
-                    items: cart.items,
-                    customer_id: cart.customerId,
-                    customer_name: cart.customerName,
-                    customer_phone: cart.customerPhone,
-                    payment_method: cart.paymentMethod,
-                    order_type: cart.orderType,
-                    total: cart.calculateSubtotal(), // Perbaikan di sini
-                    grand_total: grandTotal,
-                    paid: paymentAmount,
-                    discount: cart.discount,
-                    tax: cart.tax,
-                    fixed_discount: cart.fixedDiscount,
-                    voucher_code: cart.voucherCode,
-                    voucher_discount: cart.voucherDiscount
-                })
+                body: JSON.stringify(bodyData)
             });
 
             if (response.ok) {

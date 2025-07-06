@@ -53,6 +53,9 @@
                                     </td>
                                     <td>{{ $purchase->user->name ?? '-' }}</td>
                                     <td class="text-center">
+                                        <a href="{{ route('purchases.show', $purchase->id) }}" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center me-1" title="Lihat">
+                                            <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        </a>
                                         @if($purchase->status == 'drafted')
                                             <a href="{{ route('purchases.edit', $purchase->id) }}" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center me-1" title="Ubah">
                                                 <iconify-icon icon="lucide:edit"></iconify-icon>

@@ -155,6 +155,14 @@ class SaleController extends Controller
                 }
             }
 
+            // Tambah counting voucher jika ada voucher_code
+            if ($request->voucher_code) {
+                $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
+                if ($voucher) {
+                    $voucher->increment('times_used');
+                }
+            }
+
             DB::commit();
 
             return response()->json([

@@ -11,7 +11,17 @@ class ProductVariantController extends Controller
 {
     public function index(Request $request)
     {
-        $variants = ProductVariant::with(['product', 'productUnit'])->orderByDesc('id')->paginate(20);
+        $variants = ProductVariant::with(['product', 'productUnit'])
+            ->when($request->search, function($query) use ($request) {
+                $query->where(function($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhereHas('product', function($q2) use ($request) {
+                          $q2->where('name', 'like', '%' . $request->search . '%');
+                      });
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate(20);
         return view('product_variants.index', compact('variants'));
     }
 
@@ -69,4 +79,3 @@ class ProductVariantController extends Controller
         return redirect()->route('product-variants.index')->with('success', 'Variant berhasil dihapus.');
     }
 }
-

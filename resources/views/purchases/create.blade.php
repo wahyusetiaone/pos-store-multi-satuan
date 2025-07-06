@@ -143,7 +143,7 @@
                                 </tr>
                                 </tfoot>
                             </table>
-                            <small class="form-text text-muted">* Harga jual adalah harga jual per satuan dasar, dan tidak mempengaruhi harga penjualan serta dapat diubah pada halaman management produk.</small>
+                            <small class="form-text text-muted">* Harga jual adalah harga jual per satuan terpilih, dan tidak mempengaruhi harga penjualan serta dapat diubah pada halaman management produk.</small>
 
                         </div>
 
@@ -207,7 +207,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Harga Jual</label>
-                        <small class="form-text text-muted"> dalam satuan dasar</small>
+                        <small class="form-text text-muted"> dalam satuan dipilih</small>
                         <input type="number" id="price_input" class="form-control" placeholder="Harga Jual" min="0" disabled readonly>
                     </div>
 
@@ -220,6 +220,30 @@
                         </div>
                         <input type="hidden" id="ppn_input" value="0">
                     </div>
+
+                    <div class="mb-3">
+                        <div id="product_variant_unit_table_wrapper">
+                            <label class="form-label">Varian & Satuan Produk</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm mb-0" id="product_variant_unit_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Varian</th>
+                                            <th>Satuan</th>
+                                            <th>Konversi</th>
+                                            <th>Qty</th>
+                                            <th>Harga Jual</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="6" class="text-center text-muted">Pilih produk untuk melihat varian & satuan</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <button type="button" class="btn btn-primary w-100" id="add_item" disabled data-bs-dismiss="modal">Tambah</button>
                     </div>

@@ -75,7 +75,7 @@
 
         <!-- Right Side - Cart -->
         <div class="col-lg-4 p-3">
-            <div class="card">
+            <div class="card position-sticky" style="top: 24px; max-height: 90vh; overflow-y: auto;">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0 d-flex justify-content-between">
                         <span>Keranjang</span>
@@ -155,20 +155,20 @@
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Diskon (%):</span>
                                 <div class="input-group input-group-sm w-50">
-                                    <input type="number" name="discount_percentage" class="form-control form-control-sm" value="0" min="0" max="100">
+                                    <input type="number" name="discount_percentage" class="form-control form-control-sm" min="0" placeholder="0" max="100">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Pajak (%):</span>
                                 <div class="input-group input-group-sm w-50">
-                                    <input type="number" name="tax_percentage" class="form-control form-control-sm" value="0" min="0" max="100">
+                                    <input type="number" name="tax_percentage" class="form-control form-control-sm" placeholder="0" min="0" max="100">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Diskon (Rp):</span>
-                                <input type="number" name="fixed_discount" class="form-control form-control-sm w-50" value="0" min="0">
+                                <input type="number" name="fixed_discount" class="form-control form-control-sm w-50" placeholder="0" min="0">
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="fw-bold">Grand Total:</span>
@@ -179,7 +179,7 @@
                                 <span>Pembayaran:</span>
                                 <div class="input-group input-group-sm w-50">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" name="payment_amount" class="form-control form-control-sm" value="0" min="0" id="paymentAmount">
+                                    <input type="number" name="payment_amount" class="form-control form-control-sm" placeholder="0" min="0" id="paymentAmount">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mb-3">

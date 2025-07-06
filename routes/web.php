@@ -179,6 +179,15 @@ Route::middleware(['auth', 'store.access'])->group(function () {
 
     // API route for suppliers by store
     Route::get('/api/suppliers', [SupplierController::class, 'apiByStore'])->name('api.suppliers');
+
+    // API get product by id (for variant create warning)
+    Route::get('/api/products/get', [ProductController::class, 'getProduct'])->name('api.products.get');
+
+    // API get product variants by product id (for purchase modal)
+    Route::get('/api/products/variants', [ProductController::class, 'getVariants'])->name('api.products.variants');
+
+    // API untuk varian + unit produk (untuk modal pembelian)
+    Route::get('/api/products/variants-with-units', [ProductController::class, 'getVariantsWithUnits'])->name('products.variants-with-units');
 });
 
 // Store Selection Routes

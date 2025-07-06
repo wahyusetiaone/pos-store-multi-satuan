@@ -23,6 +23,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial state: disable if no product selected
     setFieldsState(!!productSelect.value);
 
+    // --- Tambah warning jika harga jual < harga produk ---
+    let selectedProductPrice = null;
+    const priceWarning = document.createElement('div');
+    priceWarning.className = 'alert alert-warning mt-2';
+    priceWarning.style.display = 'none';
+    priceWarning.textContent = 'Harga jual variant lebih rendah dari harga produk utama!';
+    priceInput.parentNode.appendChild(priceWarning);
+
+    function checkPriceWarning() {
+        if (selectedProductPrice !== null && priceInput.value) {
+            if (parseInt(priceInput.value) < selectedProductPrice) {
+                priceWarning.style.display = '';
+            } else {
+                priceWarning.style.display = 'none';
+            }
+        } else {
+            priceWarning.style.display = 'none';
+        }
+    }
+
     productSelect.addEventListener('change', function() {
         if (!this.value) {
             unitSelect.innerHTML = '<option value="">Pilih Satuan Produk...</option>';
@@ -47,6 +67,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 unitSelect.innerHTML = '<option value="">Pilih Satuan Produk...</option>';
                 setFieldsState(false);
             });
+        if (this.value) {
+            fetch(`/api/products/get?id=${this.value}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        selectedProductPrice = parseInt(res.data.price);
+                        checkPriceWarning();
+                    } else {
+                        selectedProductPrice = null;
+                        checkPriceWarning();
+                    }
+                })
+                .catch(() => {
+                    selectedProductPrice = null;
+                    checkPriceWarning();
+                });
+        } else {
+            selectedProductPrice = null;
+            checkPriceWarning();
+        }
     });
+    priceInput.addEventListener('input', checkPriceWarning);
 });
-

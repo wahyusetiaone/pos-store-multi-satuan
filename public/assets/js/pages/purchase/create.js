@@ -95,7 +95,7 @@ $(document).ready(function() {
             // Kalkulasi harga beli + PPN
             const base = parseFloat(buyPriceInput.value) || 0;
             const ppn = parseFloat(ppnInput.value) || 0;
-            buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+            buyPriceInputPPN.value = (base + (base * ppn / 100));
         } else {
             ppnInput.value = 0;
             buyPriceInputPPNGroup.style.display = 'none';
@@ -112,7 +112,7 @@ $(document).ready(function() {
             if (ppnCheckbox.checked) {
                 const base = parseFloat(buyPriceInput.value) || 0;
                 const ppn = parseFloat(ppnInput.value) || 0;
-                buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+                buyPriceInputPPN.value = (base + (base * ppn / 100));
             }
             autoCalcPrice();
         });
@@ -193,13 +193,13 @@ $(document).ready(function() {
             buyPrice = parseFloat(buyPriceInput.value) || 0;
         }
         const conversion = getSelectedUnitConversion();
-        document.getElementById('price_input').value = conversion > 0 ? (buyPrice / conversion).toFixed(2) : '';
+        document.getElementById('price_input').value = conversion > 0 ? (buyPrice / conversion) : '';
     }
     buyPriceInput.addEventListener('input', function() {
         if (ppnCheckbox.checked) {
             const base = parseFloat(buyPriceInput.value) || 0;
             const ppn = parseFloat(ppnInput.value) || 0;
-            buyPriceInputPPN.value = (base + (base * ppn / 100)).toFixed(2);
+            buyPriceInputPPN.value = (base + (base * ppn / 100));
         }
         autoCalcPrice();
     });
@@ -433,6 +433,45 @@ $(document).ready(function() {
             document.getElementById('add_item').click();
         }
     }
+
+    // --- Fetch and render product variants with units ---
+    function renderProductVariantUnitTable(productId) {
+        const tableBody = document.querySelector('#product_variant_unit_table tbody');
+        if (!productId || productId === 'new') {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Pilih produk untuk melihat varian & satuan</td></tr>';
+            return;
+        }
+        fetch(`/api/products/variants-with-units?product_id=${productId}`)
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success || !res.data.length) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Tidak ada varian untuk produk ini</td></tr>';
+                    return;
+                }
+                tableBody.innerHTML = res.data.map(variant => `
+                    <tr>
+                        <td>${variant.name || '-'}</td>
+                        <td>${variant.unit_name || '-'}</td>
+                        <td>${variant.conversion_factor_cash || '-'}</td>
+                        <td>${variant.qty || '-'}</td>
+                        <td>${variant.price ? 'Rp ' + variant.price.toLocaleString('id-ID') : '-'}</td>
+                        <td>${variant.status == 1 ? 'Aktif' : 'Nonaktif'}</td>
+                    </tr>
+                `).join('');
+            })
+            .catch(() => {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Gagal memuat data varian</td></tr>';
+            });
+    }
+
+    // Panggil saat produk dipilih
+    productSelect.addEventListener('change', function() {
+        renderProductVariantUnitTable(this.value);
+    });
+    // Inisialisasi tabel saat modal dibuka
+    document.getElementById('addProductModal').addEventListener('show.bs.modal', function() {
+        renderProductVariantUnitTable(productSelect.value);
+    });
 });
 
 // Global function for remove item (needs to be global for onclick handler)

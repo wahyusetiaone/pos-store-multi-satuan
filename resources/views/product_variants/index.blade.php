@@ -9,10 +9,17 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div></div>
-                    <a href="{{ route('product-variants.create') }}" class="btn btn-success">Tambah Variant</a>
-                </div>
+                <form method="GET" action="{{ route('product-variants.index') }}" class="row g-2 align-items-center" id="variantFilterForm">
+                    <div class="col-auto">
+                        <input type="text" name="search" class="form-control" placeholder="Cari variant..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <a href="{{ route('product-variants.create') }}" class="btn btn-success">Tambah Variant</a>
+                    </div>
+                </form>
             </div>
             <div class="card-body">
                 @if(session('success'))

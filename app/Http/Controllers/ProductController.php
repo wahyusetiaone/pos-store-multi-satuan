@@ -343,5 +343,67 @@ class ProductController extends Controller
 
         return $pdf->download('barcodes.pdf');
     }
-}
 
+    public function getProduct(Request $request)
+    {
+        $product = Product::find($request->id);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan'], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'sku' => $product->sku,
+            ]
+        ]);
+    }
+
+    public function getVariants(Request $request)
+    {
+        $productId = $request->id;
+        $product = Product::with(['variants.productUnit.unit'])->find($productId);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan'], 404);
+        }
+        $variants = $product->variants->map(function($variant) {
+            return [
+                'id' => $variant->id,
+                'name' => $variant->name,
+                'unit' => $variant->productUnit && $variant->productUnit->unit ? $variant->productUnit->unit->name : '-',
+                'price' => $variant->price,
+                'qty' => $variant->qty,
+                'status' => $variant->status,
+            ];
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $variants
+        ]);
+    }
+
+    // API: Get product variants with unit info for a given product
+    public function getVariantsWithUnits(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $product = Product::with(['variants.productUnit.unit'])->find($productId);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan', 'data' => []], 404);
+        }
+        $variants = $product->variants->map(function($variant) {
+            return [
+                'id' => $variant->id,
+                'name' => $variant->name,
+                'unit_name' => $variant->productUnit && $variant->productUnit->unit ? $variant->productUnit->unit->name : '-',
+                'conversion_factor' => $variant->productUnit ? $variant->productUnit->conversion_factor : null,
+                'conversion_factor_cash' => $variant->productUnit ? $variant->productUnit->conversion_factor_cash : null,
+                'price' => $variant->price,
+                'qty' => $variant->qty,
+                'status' => $variant->status,
+            ];
+        });
+        return response()->json(['success' => true, 'data' => $variants]);
+    }
+}
