@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let unitIndex = 1;
+    let unitIndex = document.querySelectorAll('.product-unit-row').length;
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('add-unit-row')) {
             e.preventDefault();
@@ -28,4 +28,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
