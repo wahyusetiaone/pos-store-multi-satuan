@@ -6,6 +6,7 @@ use App\Models\ProductVariant;
 use App\Models\Product;
 use App\Models\ProductUnit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductVariantController extends Controller
 {
@@ -13,11 +14,13 @@ class ProductVariantController extends Controller
     {
         $variants = ProductVariant::with(['product', 'productUnit'])
             ->when($request->search, function($query) use ($request) {
-                $query->where(function($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhereHas('product', function($q2) use ($request) {
-                          $q2->where('name', 'like', '%' . $request->search . '%');
-                      });
+                $searchLower = strtolower($request->search); // Convert the search term to lowercase once
+
+                $query->where(function($q) use ($searchLower) {
+                    $q->where(DB::raw('LOWER(name)'), 'like', '%' . $searchLower . '%')
+                        ->orWhereHas('product', function($q2) use ($searchLower) {
+                            $q2->where(DB::raw('LOWER(name)'), 'like', '%' . $searchLower . '%');
+                        });
                 });
             })
             ->orderByDesc('id')

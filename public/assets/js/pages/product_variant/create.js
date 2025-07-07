@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.querySelector('select[name="status"]');
     const submitBtn = document.querySelector('button[type="submit"]');
 
+    let temporaryUnitsData = [];
+
     function setFieldsState(enabled) {
         unitSelect.disabled = !enabled;
         nameInput.disabled = !enabled;
@@ -32,8 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     priceInput.parentNode.appendChild(priceWarning);
 
     function checkPriceWarning() {
-        if (selectedProductPrice !== null && priceInput.value) {
-            if (parseInt(priceInput.value) < selectedProductPrice) {
+        if (selectedProductPrice !== null && priceInput.value && unitSelect.value) {
+            const selectedUnit = temporaryUnitsData.find(unit => unit.id == unitSelect.value);
+            if (parseInt(priceInput.value) < (selectedProductPrice * selectedUnit.conversion_factor)) {
                 priceWarning.style.display = '';
             } else {
                 priceWarning.style.display = 'none';
@@ -47,14 +50,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!this.value) {
             unitSelect.innerHTML = '<option value="">Pilih Satuan Produk...</option>';
             setFieldsState(false);
+            temporaryUnitsData = [];
             return;
         }
         // Fetch units for selected product
         fetch(`/product-units?product_id=${this.value}`)
             .then(res => res.json())
             .then(units => {
+                temporaryUnitsData = [];
                 unitSelect.innerHTML = '<option value="">Pilih Satuan Produk...</option>';
                 units.forEach(unit => {
+                    temporaryUnitsData = units;
                     const opt = document.createElement('option');
                     opt.value = unit.id;
                     opt.textContent = unit.unit_name + (unit.conversion_factor ? ` (Konversi: ${unit.conversion_factor_cash})` : '');
