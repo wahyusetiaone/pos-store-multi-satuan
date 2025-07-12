@@ -120,7 +120,7 @@ class SaleController extends Controller
                 'sale_date' => now(), // Using Carbon now() instance
                 'total' => $request->total,
                 'grand_total' => $request->grand_total,
-                'discount' => $request->discount ?? 0,
+                'discount' => $request->fixed_discount ?? 0,
                 'order_type' => $request->order_type,
                 'paid' => $request->paid,
                 'payment_method' => $request->payment_method,

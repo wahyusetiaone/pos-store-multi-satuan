@@ -168,7 +168,7 @@
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Diskon (Rp):</span>
-                                <input type="number" name="fixed_discount" class="form-control form-control-sm w-50" placeholder="0" min="0">
+                                <input type="number" name="fixed_discount" class="form-control form-control-sm w-50 rupiah-format-input" placeholder="0" min="0">
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="fw-bold">Grand Total:</span>
@@ -179,7 +179,7 @@
                                 <span>Pembayaran:</span>
                                 <div class="input-group input-group-sm w-50">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" name="payment_amount" class="form-control form-control-sm" placeholder="0" min="0" id="paymentAmount">
+                                    <input type="number" name="payment_amount" class="form-control form-control-sm rupiah-format-input" placeholder="0" min="0" id="paymentAmount">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mb-3">

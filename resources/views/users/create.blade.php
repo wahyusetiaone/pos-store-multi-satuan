@@ -71,7 +71,7 @@
                                     <select name="role" class="form-control @error('role') is-invalid @enderror">
                                         <option value="">Pilih role</option>
                                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="owner" {{ old('role') == 'owner' ? 'selected' : '' }}>Owner</option>
+                                        <option value="owner" {{ old('role') == 'purchase' ? 'selected' : '' }}>Purchase</option>
                                         <option value="cashier" {{ old('role') == 'cashier' ? 'selected' : '' }}>Kasir</option>
                                     </select>
                                     @error('role')

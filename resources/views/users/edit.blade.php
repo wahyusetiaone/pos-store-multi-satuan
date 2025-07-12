@@ -72,7 +72,7 @@
                                     <select name="role" class="form-control @error('role') is-invalid @enderror">
                                         <option value="">Pilih role</option>
                                         <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="owner" {{ old('role', $user->role) == 'purchase' ? 'selected' : '' }}>Owner</option>
+                                        <option value="owner" {{ old('role', $user->role) == 'purchase' ? 'selected' : '' }}>Purchase</option>
                                         <option value="cashier" {{ old('role', $user->role) == 'cashier' ? 'selected' : '' }}>Kasir</option>
                                     </select>
                                     @error('role')

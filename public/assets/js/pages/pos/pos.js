@@ -29,6 +29,50 @@ function showToast(message, type = 'info') {
     toast.querySelector('.btn-close').onclick = () => toast.remove();
 }
 
+// Fungsi untuk membersihkan nilai dari format rupiah (menjadi angka murni)
+function cleanRupiah(value) {
+    return parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
+}
+
+// Fungsi untuk memformat angka menjadi format rupiah (misal: 1000000 -> 1.000.000)
+function formatRupiah(number) {
+    const cleanedNumber = cleanRupiah(number);
+    if (cleanedNumber === 0) return '0'; // Handle case when value is 0 or empty
+
+    const formatter = new Intl.NumberFormat('id-ID'); // Menggunakan locale Indonesia
+    return formatter.format(cleanedNumber);
+}
+
+// Dapatkan semua input dengan class 'rupiah-format-input'
+const rupiahInputs = document.querySelectorAll('.rupiah-format-input');
+
+rupiahInputs.forEach(input => {
+    // Event listener saat input diketik
+    input.addEventListener('input', function(e) {
+        let value = e.target.value;
+        const cleaned = cleanRupiah(value);
+        e.target.value = formatRupiah(cleaned);
+
+        // hidden input kelas 'rupiah-raw-value'
+        // const rawInput = e.target.closest('.input-group')?.querySelector('.rupiah-raw-value');
+        // if (rawInput) {
+        //     rawInput.value = cleaned;
+        // }
+    });
+
+    // Event listener saat input kehilangan fokus (opsional, untuk memastikan format saat paste)
+    input.addEventListener('blur', function(e) {
+        let value = e.target.value;
+        const cleaned = cleanRupiah(value);
+        e.target.value = formatRupiah(cleaned);
+    });
+
+    // Inisialisasi format saat halaman dimuat jika ada nilai awal
+    // Ini memastikan nilai yang sudah ada dari server diformat dengan benar saat pertama kali load
+    if (input.value) {
+        input.value = formatRupiah(input.value);
+    }
+});
 // POS Cart Management
 const cart = {
     items: [],
@@ -269,13 +313,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fixed discount input handler
     document.querySelector('input[name="fixed_discount"]').addEventListener('input', function() {
-        cart.fixedDiscount = parseFloat(this.value) || 0;
+        cart.fixedDiscount = parseFloat(cleanRupiah(this.value)) || 0;
         cart.updateCart();
     });
 
     // Payment amount handler
     document.querySelector('input[name="payment_amount"]').addEventListener('input', function() {
-        cart.paymentAmount = parseFloat(this.value) || 0;
+        cart.paymentAmount = parseFloat(cleanRupiah(this.value)) || 0;
         cart.updateCart();
     });
 
@@ -326,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const grandTotal = cart.calculateGrandTotal();
-        const paymentAmount = parseFloat(document.querySelector('input[name="payment_amount"]').value) || 0;
+        const paymentAmount = parseFloat(cleanRupiah(document.querySelector('input[name="payment_amount"]').value)) || 0;
 
         // Check if payment is less than grand total (piutang) but no customer selected
         if (paymentAmount < grandTotal && !cart.customerId) {
@@ -385,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add payment amount handler with validation
     document.querySelector('input[name="payment_amount"]').addEventListener('input', function() {
-        const paymentAmount = parseFloat(this.value) || 0;
+        const paymentAmount = parseFloat(cleanRupiah(this.value) || 0);
         const grandTotal = cart.calculateGrandTotal();
 
         // If payment is less than grand total, show warning about customer requirement
@@ -549,16 +593,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-function formatRupiah(angka) {
-    return 'Rp ' + angka.toLocaleString('id-ID') + ',-';
-}
 function updateChangeAndLabel() {
     let grandTotal = 0;
     let payment = 0;
     const grandTotalText = document.getElementById('grandTotal').innerText.replace(/[^\d]/g, '');
     if (grandTotalText) grandTotal = parseInt(grandTotalText);
     const paymentInput = document.getElementById('paymentAmount');
-    if (paymentInput && paymentInput.value) payment = parseInt(paymentInput.value);
+    if (paymentInput && paymentInput.value) payment = parseInt(cleanRupiah(paymentInput.value));
     let change = payment - grandTotal;
     const changeLabel = document.querySelector('#changeAmount').parentElement.querySelector('span');
     if (isNaN(change)) change = 0;

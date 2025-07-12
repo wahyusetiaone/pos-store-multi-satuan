@@ -193,7 +193,8 @@ $(document).ready(function() {
             buyPrice = parseFloat(buyPriceInput.value) || 0;
         }
         const conversion = getSelectedUnitConversion();
-        document.getElementById('price_input').value = conversion > 0 ? (buyPrice / conversion) : '';
+        let result = (buyPrice / conversion);
+        document.getElementById('price_input').value = conversion > 0 ? Math.ceil(result)  : '';
     }
     buyPriceInput.addEventListener('input', function() {
         if (ppnCheckbox.checked) {
